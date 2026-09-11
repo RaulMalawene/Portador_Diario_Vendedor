@@ -4,7 +4,7 @@ import { FileDown, FileSpreadsheet, Plus } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import ProductsToolbar from '@/features/products/components/ProductsToolbar.vue'
 import ProductsTable from '@/features/products/components/ProductsTable.vue'
-import ProductsPagination from '@/features/products/components/ProductsPagination.vue'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
 import ProductFormModal from '@/features/products/components/ProductFormModal.vue'
 import { useProducts } from '@/features/products/composables/useProducts'
 import { useProductForm } from '@/features/products/composables/useProductForm'
@@ -79,7 +79,11 @@ function handleSubmit() {
         @remove="remove"
       />
 
-      <ProductsPagination :shown="filteredProducts.length" :total="products.length" />
+      <PaginationBar
+        :shown="filteredProducts.length"
+        :total="products.length"
+        items-label="produtos"
+      />
     </section>
 
     <ProductFormModal

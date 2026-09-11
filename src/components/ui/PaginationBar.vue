@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 
-defineProps<{
-  shown: number
-  total: number
-}>()
+withDefaults(
+  defineProps<{
+    shown: number
+    total: number
+    itemsLabel?: string
+  }>(),
+  {
+    itemsLabel: 'resultados',
+  },
+)
 </script>
 
 <template>
   <div class="pagination">
     <span class="pagination__info">
-      A mostrar <strong>{{ shown }}</strong> de <strong>{{ total }}</strong> produtos
+      A mostrar <strong>{{ shown }}</strong> de <strong>{{ total }}</strong> {{ itemsLabel }}
     </span>
     <div class="pagination__pages">
       <button class="page-btn" type="button" aria-label="Página anterior">
