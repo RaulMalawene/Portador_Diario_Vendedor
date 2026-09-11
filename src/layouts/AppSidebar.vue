@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useRouter, RouterLink, useRoute } from 'vue-router'
-import { Package, LogOut } from '@lucide/vue'
+import { LogOut } from '@lucide/vue'
 import { navItems } from './navigation'
+import logoUrl from '@/assets/Logotipo.svg'
 
 defineProps<{
   userName: string
@@ -20,8 +21,7 @@ function logout() {
 <template>
   <aside class="sidebar">
     <div class="sidebar__logo">
-      <span class="logo__box"><Package :size="20" /></span>
-      <span class="logo__text">Vendor Portal</span>
+      <img class="logo__img" :src="logoUrl" alt="Portador Diário" />
     </div>
 
     <nav class="nav">
@@ -74,22 +74,10 @@ function logout() {
   padding: 6px 8px 24px;
 }
 
-.logo__box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
+.logo__img {
+  display: block;
   height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--brand-primary);
-  color: var(--color-surface);
-}
-
-.logo__text {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--color-ink);
+  width: auto;
 }
 
 .nav {
