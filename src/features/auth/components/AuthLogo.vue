@@ -11,6 +11,6 @@ import logoUrl from '@/assets/Logotipo.svg'
   display: block;
   height: 64px;
   width: auto;
-  margin-bottom: 40px;
+  margin: 0 auto 40px;
 }
 </style>

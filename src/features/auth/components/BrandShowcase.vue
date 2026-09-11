@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTypewriter } from '../composables/useTypewriter'
+import enterOtpUrl from '@/assets/enter-otp.svg'
 
 const props = withDefaults(
   defineProps<{
@@ -33,6 +34,10 @@ const { displayedText } = useTypewriter(props.phrases)
     </p>
 
     <div class="brand-showcase__rule" aria-hidden="true"></div>
+
+    <div class="brand-showcase__illustration">
+      <img :src="enterOtpUrl" alt="" aria-hidden="true" />
+    </div>
   </aside>
 </template>
 
@@ -92,6 +97,34 @@ const { displayedText } = useTypewriter(props.phrases)
   margin-top: 40px;
   border-radius: var(--radius-full);
   background: var(--brand-accent);
+}
+
+.brand-showcase__illustration {
+  position: relative;
+  align-self: center;
+  width: min(100%, 360px);
+  margin-top: 40px;
+}
+
+.brand-showcase__illustration::before {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--brand-primary-tint) 0%,
+    var(--brand-accent-tint) 100%
+  );
+  z-index: 0;
+}
+
+.brand-showcase__illustration img {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 @keyframes brand-showcase-blink {
