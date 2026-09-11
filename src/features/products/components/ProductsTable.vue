@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ArrowUpDown, Image as ImageIcon } from '@lucide/vue'
+import { ArrowUpDown } from '@lucide/vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import ProductRowMenu from './ProductRowMenu.vue'
 import type { Product } from '../types/products.types'
@@ -29,9 +29,17 @@ function toggleSort() {
 
 <template>
   <table class="table">
+    <colgroup>
+      <col class="col-name" />
+      <col class="col-sku" />
+      <col class="col-category" />
+      <col class="col-price" />
+      <col class="col-stock" />
+      <col class="col-status" />
+      <col class="col-actions" />
+    </colgroup>
     <thead>
       <tr>
-        <th>Imagem</th>
         <th>
           <button type="button" class="th-sort" @click="toggleSort">
             Produto <ArrowUpDown :size="14" />
@@ -47,19 +55,16 @@ function toggleSort() {
     </thead>
     <tbody>
       <tr v-if="sortedProducts.length === 0">
-        <td class="table__empty" colspan="8">Nenhum produto encontrado.</td>
+        <td class="table__empty" colspan="7">Nenhum produto encontrado.</td>
       </tr>
       <tr
         v-for="product in sortedProducts"
         :key="product.sku"
         :class="{ 'is-inactive': !product.active }"
       >
-        <td>
-          <span class="thumb"><ImageIcon :size="18" /></span>
-        </td>
-        <td class="td-strong">{{ product.name }}</td>
-        <td class="td-mono">{{ product.sku }}</td>
-        <td class="td-muted">{{ product.categoria }}</td>
+        <td class="td-strong td-truncate">{{ product.name }}</td>
+        <td class="td-mono td-truncate">{{ product.sku }}</td>
+        <td class="td-muted td-truncate">{{ product.categoria }}</td>
         <td class="ta-right td-mono">{{ product.preco }} MT</td>
         <td class="ta-right td-mono" :class="{ 'td-zero': product.stock === 0 }">
           {{ product.stock }}
@@ -85,7 +90,36 @@ function toggleSort() {
 <style scoped>
 .table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
+}
+
+.col-name {
+  width: 26%;
+}
+
+.col-sku {
+  width: 14%;
+}
+
+.col-category {
+  width: 16%;
+}
+
+.col-price {
+  width: 14%;
+}
+
+.col-stock {
+  width: 10%;
+}
+
+.col-status {
+  width: 12%;
+}
+
+.col-actions {
+  width: 64px;
 }
 
 .table th {
@@ -144,6 +178,12 @@ function toggleSort() {
   color: var(--color-body);
 }
 
+.td-truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .td-zero {
   font-weight: 700;
   color: var(--color-danger);
@@ -151,16 +191,5 @@ function toggleSort() {
 
 .ta-right {
   text-align: right;
-}
-
-.thumb {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-soft);
-  color: var(--color-muted);
 }
 </style>
