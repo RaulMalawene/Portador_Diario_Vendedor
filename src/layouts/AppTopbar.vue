@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Search, Bell, LayoutGrid } from '@lucide/vue'
+import { Bell, LayoutGrid } from '@lucide/vue'
 
 defineProps<{
   title: string
@@ -14,10 +14,6 @@ defineProps<{
     </div>
 
     <div class="topbar__right">
-      <span class="search">
-        <Search :size="18" class="search__icon" />
-        <input type="text" placeholder="Pesquisar produtos, pedidos..." />
-      </span>
       <button class="icon-btn" type="button" aria-label="Notificações"><Bell :size="20" /></button>
     </div>
   </header>
@@ -61,31 +57,6 @@ defineProps<{
   gap: 12px;
 }
 
-.search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 280px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-}
-
-.search__icon {
-  color: var(--color-muted);
-}
-
-.search input {
-  flex: 1;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--color-ink);
-}
-
 .icon-btn {
   display: flex;
   align-items: center;
@@ -103,9 +74,4 @@ defineProps<{
   background: var(--color-surface-soft);
 }
 
-@media (max-width: 720px) {
-  .search {
-    width: 160px;
-  }
-}
 </style>
