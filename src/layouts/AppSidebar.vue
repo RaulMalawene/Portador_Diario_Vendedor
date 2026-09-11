@@ -31,7 +31,10 @@ function logout() {
         :key="item.label"
         v-bind="item.to ? { to: item.to } : { href: '#' }"
         class="nav__item"
-        :class="{ 'is-active': item.to === route.path }"
+        :class="{
+          'is-active':
+            !!item.to && (route.path === item.to || route.path.startsWith(`${item.to}/`)),
+        }"
       >
         <component :is="item.icon" :size="20" />
         <span>{{ item.label }}</span>

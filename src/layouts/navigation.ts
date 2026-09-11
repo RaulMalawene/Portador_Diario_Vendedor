@@ -5,5 +5,5 @@ export const navItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutGrid, to: '/home' },
   { label: 'Produtos', icon: Package, to: '/produtos' },
   { label: 'Inventário', icon: Boxes, to: '/inventario' },
-  { label: 'Encomendas', icon: ShoppingCart },
+  { label: 'Encomendas', icon: ShoppingCart, to: '/encomendas' },
 ]

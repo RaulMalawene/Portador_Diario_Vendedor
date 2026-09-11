@@ -1,0 +1,184 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { FileDown, ShoppingCart, Clock, PackageSearch, Wallet } from '@lucide/vue'
+import AppShell from '@/layouts/AppShell.vue'
+import PaginationBar from '@/components/ui/PaginationBar.vue'
+import OrdersToolbar from '@/features/orders/components/OrdersToolbar.vue'
+import OrdersTable from '@/features/orders/components/OrdersTable.vue'
+import OrderKpiCard from '@/features/orders/components/OrderKpiCard.vue'
+import { useOrders } from '@/features/orders/composables/useOrders'
+import { formatMoney } from '@/features/orders/utils/orders'
+
+const { orders, kpis } = useOrders()
+
+const search = ref('')
+const statusFilter = ref('all')
+
+const filteredOrders = computed(() =>
+  orders.value.filter((order) => {
+    const query = search.value.trim().toLowerCase()
+    const matchesQuery =
+      !query ||
+      order.number.toLowerCase().includes(query) ||
+      order.customer.name.toLowerCase().includes(query)
+    const matchesStatus = statusFilter.value === 'all' || statusFilter.value === order.status
+    return matchesQuery && matchesStatus
+  }),
+)
+</script>
+
+<template>
+  <AppShell
+    title="Encomendas"
+    user-name="João Maputo"
+    user-role="Fornecedor Premium"
+    user-initials="JM"
+  >
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Encomendas</h1>
+        <p class="page-sub">
+          Acompanhe e faça a gestão do ciclo de vida das encomendas dos seus clientes.
+        </p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn--ghost" type="button">
+          <FileDown :size="16" /><span>Exportar Dados</span>
+        </button>
+      </div>
+    </div>
+
+    <section class="kpis">
+      <OrderKpiCard
+        label="Total de Encomendas"
+        :value="kpis.total"
+        note="no período actual"
+        :icon="ShoppingCart"
+      />
+      <OrderKpiCard
+        label="Pendentes"
+        :value="kpis.pending"
+        note="aguardam confirmação"
+        :icon="Clock"
+        tone="warning"
+      />
+      <OrderKpiCard
+        label="Em Curso"
+        :value="kpis.inProgress"
+        note="confirmadas, em processo ou enviadas"
+        :icon="PackageSearch"
+      />
+      <OrderKpiCard
+        label="Receita das Encomendas"
+        :value="formatMoney(kpis.revenue)"
+        note="valor acumulado"
+        :icon="Wallet"
+        compact
+      />
+    </section>
+
+    <OrdersToolbar v-model:search="search" v-model:status="statusFilter" />
+
+    <section class="card card--table">
+      <OrdersTable :orders="filteredOrders" />
+
+      <PaginationBar
+        :shown="filteredOrders.length"
+        :total="orders.length"
+        items-label="encomendas"
+      />
+    </section>
+  </AppShell>
+</template>
+
+<style scoped>
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.page-title {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.page-sub {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-body);
+}
+
+.page-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--brand-primary);
+  color: var(--color-surface);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn:hover {
+  background: var(--brand-primary-dark);
+}
+
+.btn--ghost {
+  background: var(--color-surface);
+  color: var(--color-body);
+  border: 1px solid var(--color-border);
+}
+
+.btn--ghost:hover {
+  background: var(--color-surface-soft);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 1100px) {
+  .kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .page-head {
+    flex-direction: column;
+  }
+}
+</style>
