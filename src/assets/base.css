@@ -64,8 +64,8 @@ html.has-modal-open {
 
 body {
   min-height: 100vh;
-  color: var(--color-text);
-  background: var(--color-background);
+  color: var(--color-ink);
+  background: var(--color-surface);
   transition:
     color 0.5s,
     background-color 0.5s;

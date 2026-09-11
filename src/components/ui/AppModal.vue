@@ -2,10 +2,16 @@
 import { onBeforeUnmount, onMounted, watch } from 'vue'
 import { X } from '@lucide/vue'
 
-const props = defineProps<{
-  modelValue: boolean
-  labelledBy: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean
+    labelledBy: string
+    size?: 'sm' | 'md' | 'lg'
+  }>(),
+  {
+    size: 'sm',
+  },
+)
 
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
@@ -38,7 +44,13 @@ onBeforeUnmount(() => {
   <Teleport to="body">
     <Transition name="app-modal">
       <div v-if="modelValue" class="app-modal" @mousedown.self="close">
-        <div class="app-modal__card" role="dialog" aria-modal="true" :aria-labelledby="labelledBy">
+        <div
+          class="app-modal__card"
+          :class="`app-modal__card--${size}`"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="labelledBy"
+        >
           <button type="button" class="app-modal__close" aria-label="Fechar" @click="close">
             <X :size="18" />
           </button>
@@ -65,11 +77,22 @@ onBeforeUnmount(() => {
 .app-modal__card {
   position: relative;
   width: 100%;
-  max-width: 420px;
   padding: 32px;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
+}
+
+.app-modal__card--sm {
+  max-width: 420px;
+}
+
+.app-modal__card--md {
+  max-width: 480px;
+}
+
+.app-modal__card--lg {
+  max-width: 560px;
 }
 
 .app-modal__close {

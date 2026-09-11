@@ -1,13 +1,5 @@
-import { LayoutGrid, Package, Boxes, ShoppingCart, User, ArrowUpRight } from '@lucide/vue'
-import type { KpiMetric, NavItem, Order, SalesPoint } from '../types/dashboard.types'
-
-export const navItems: NavItem[] = [
-  { label: 'Dashboard', icon: LayoutGrid, to: '/home' },
-  { label: 'Produtos', icon: Package },
-  { label: 'Inventário', icon: Boxes },
-  { label: 'Encomendas', icon: ShoppingCart },
-  { label: 'Perfil', icon: User },
-]
+import { Package, Boxes, ShoppingCart, ArrowUpRight } from '@lucide/vue'
+import type { KpiMetric, Order, SalesPoint } from '../types/dashboard.types'
 
 export const kpis: KpiMetric[] = [
   {

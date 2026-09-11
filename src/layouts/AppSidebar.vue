@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { RouterLink } from 'vue-router'
+import { useRouter, RouterLink, useRoute } from 'vue-router'
 import { Package, Settings, LogOut } from '@lucide/vue'
-import { navItems } from '../data/dashboard.mock'
+import { navItems } from './navigation'
 
 defineProps<{
   userName: string
@@ -11,6 +10,7 @@ defineProps<{
 }>()
 
 const router = useRouter()
+const route = useRoute()
 
 function logout() {
   router.push('/login')
@@ -31,7 +31,7 @@ function logout() {
         :key="item.label"
         v-bind="item.to ? { to: item.to } : { href: '#' }"
         class="nav__item"
-        :class="{ 'is-active': item.to === $route.path }"
+        :class="{ 'is-active': item.to === route.path }"
       >
         <component :is="item.icon" :size="20" />
         <span>{{ item.label }}</span>

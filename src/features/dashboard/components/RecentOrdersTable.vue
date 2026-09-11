@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ChevronRight } from '@lucide/vue'
+import StatusBadge from '@/components/ui/StatusBadge.vue'
 import type { Order } from '../types/dashboard.types'
-import { badgeClass } from '../utils/orders'
+import { badgeVariant } from '../utils/orders'
 
 defineProps<{ orders: Order[] }>()
 </script>
@@ -25,7 +26,7 @@ defineProps<{ orders: Order[] }>()
         <div class="orders__row-meta">
           <span class="orders__date">{{ order.data }}</span>
           <span class="orders__value">{{ order.valor }}</span>
-          <span class="badge" :class="badgeClass(order.estado)">{{ order.estado }}</span>
+          <StatusBadge :variant="badgeVariant(order.estado)">{{ order.estado }}</StatusBadge>
         </div>
       </li>
     </ul>
@@ -145,39 +146,5 @@ defineProps<{ orders: Order[] }>()
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
-}
-
-.badge {
-  display: inline-flex;
-  flex-shrink: 0;
-  padding: 3px 12px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.badge--success {
-  background: var(--color-success-tint);
-  color: var(--color-success);
-}
-
-.badge--info {
-  background: var(--color-info-tint);
-  color: var(--color-info);
-}
-
-.badge--warning {
-  background: var(--color-warning-tint);
-  color: var(--color-warning);
-}
-
-.badge--teal {
-  background: var(--color-teal-tint);
-  color: var(--color-teal);
-}
-
-.badge--neutral {
-  background: var(--color-surface-soft);
-  color: var(--color-body);
 }
 </style>

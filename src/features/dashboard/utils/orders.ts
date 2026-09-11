@@ -14,15 +14,15 @@ export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   Entregue: '#711c5a',
 }
 
-const BADGE_CLASS_BY_STATUS: Record<OrderStatus, string> = {
-  Entregue: 'badge--success',
-  Processando: 'badge--info',
-  Pendente: 'badge--warning',
-  Enviado: 'badge--teal',
+const BADGE_VARIANT_BY_STATUS: Record<OrderStatus, 'success' | 'info' | 'warning' | 'teal'> = {
+  Entregue: 'success',
+  Processando: 'info',
+  Pendente: 'warning',
+  Enviado: 'teal',
 }
 
-export function badgeClass(estado: OrderStatus): string {
-  return BADGE_CLASS_BY_STATUS[estado] ?? 'badge--neutral'
+export function badgeVariant(estado: OrderStatus) {
+  return BADGE_VARIANT_BY_STATUS[estado] ?? 'neutral'
 }
 
 export interface OrderStatusSummary {

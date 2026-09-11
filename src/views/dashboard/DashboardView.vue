@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Calendar, Download } from '@lucide/vue'
-import DashboardSidebar from '@/features/dashboard/components/DashboardSidebar.vue'
-import DashboardTopbar from '@/features/dashboard/components/DashboardTopbar.vue'
-import DashboardFooter from '@/features/dashboard/components/DashboardFooter.vue'
+import AppShell from '@/layouts/AppShell.vue'
+import AppFooter from '@/layouts/AppFooter.vue'
 import KpiCard from '@/features/dashboard/components/KpiCard.vue'
 import SalesBarChart from '@/features/dashboard/components/SalesBarChart.vue'
 import OrderStatusDonutChart from '@/features/dashboard/components/OrderStatusDonutChart.vue'
@@ -12,90 +11,66 @@ import { kpis, orders, weeklySales } from '@/features/dashboard/data/dashboard.m
 </script>
 
 <template>
-  <div class="dashboard">
-    <DashboardSidebar user-name="João Maputo" user-role="Fornecedor Premium" user-initials="JM" />
+  <AppShell
+    title="Dashboard"
+    user-name="João Maputo"
+    user-role="Fornecedor Premium"
+    user-initials="JM"
+  >
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Bem-vindo, João Maputo</h1>
+        <p class="page-sub">Monitorize o desempenho do seu negócio em tempo real.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn--ghost" type="button">
+          <Calendar :size="16" /><span>Últimos 30 dias</span>
+        </button>
+        <button class="btn" type="button">
+          <Download :size="16" /><span>Exportar Relatório</span>
+        </button>
+      </div>
+    </div>
 
-    <div class="dashboard__main">
-      <DashboardTopbar title="Dashboard" />
+    <section class="kpis">
+      <KpiCard v-for="metric in kpis" :key="metric.label" :metric="metric" />
+    </section>
 
-      <main class="dashboard__content">
-        <div class="page-head">
-          <div>
-            <h1 class="page-title">Bem-vindo, João Maputo</h1>
-            <p class="page-sub">Monitorize o desempenho do seu negócio em tempo real.</p>
+    <div class="grid">
+      <div class="grid__main">
+        <section class="card">
+          <h2 class="card__title">Vendas da Semana</h2>
+          <p class="card__sub">Receita diária nos últimos 7 dias.</p>
+          <div class="card__chart">
+            <SalesBarChart :points="weeklySales" />
           </div>
-          <div class="page-actions">
-            <button class="btn btn--ghost" type="button">
-              <Calendar :size="16" /><span>Últimos 30 dias</span>
-            </button>
-            <button class="btn" type="button">
-              <Download :size="16" /><span>Exportar Relatório</span>
-            </button>
-          </div>
-        </div>
-
-        <section class="kpis">
-          <KpiCard v-for="metric in kpis" :key="metric.label" :metric="metric" />
         </section>
 
-        <div class="grid">
-          <div class="grid__main">
-            <section class="card">
-              <h2 class="card__title">Vendas da Semana</h2>
-              <p class="card__sub">Receita diária nos últimos 7 dias.</p>
-              <div class="card__chart">
-                <SalesBarChart :points="weeklySales" />
-              </div>
-            </section>
+        <section class="card">
+          <DeliveryProgressCard :current="92" :target="95" />
+        </section>
+      </div>
 
-            <section class="card">
-              <DeliveryProgressCard :current="92" :target="95" />
-            </section>
+      <aside class="grid__side">
+        <section class="card">
+          <h2 class="card__title">Estado das Encomendas</h2>
+          <p class="card__sub">Distribuição das encomendas por fase actual.</p>
+          <div class="card__chart">
+            <OrderStatusDonutChart :orders="orders" />
           </div>
+        </section>
 
-          <aside class="grid__side">
-            <section class="card">
-              <h2 class="card__title">Estado das Encomendas</h2>
-              <p class="card__sub">Distribuição das encomendas por fase actual.</p>
-              <div class="card__chart">
-                <OrderStatusDonutChart :orders="orders" />
-              </div>
-            </section>
-
-            <section class="card">
-              <RecentOrdersTable :orders="orders" />
-            </section>
-          </aside>
-        </div>
-
-        <DashboardFooter />
-      </main>
+        <section class="card">
+          <RecentOrdersTable :orders="orders" />
+        </section>
+      </aside>
     </div>
-  </div>
+
+    <AppFooter />
+  </AppShell>
 </template>
 
 <style scoped>
-.dashboard {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-  background: var(--color-surface);
-}
-
-.dashboard__main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-  height: 100%;
-}
-
-.dashboard__content {
-  flex: 1;
-  padding: 28px;
-  overflow-y: auto;
-}
-
 .page-head {
   display: flex;
   align-items: flex-start;

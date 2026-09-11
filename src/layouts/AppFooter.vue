@@ -3,10 +3,10 @@ import { CheckCircle } from '@lucide/vue'
 </script>
 
 <template>
-  <footer class="dashboard-foot">
+  <footer class="app-foot">
     <span>© 2026 Vendor Portal - Gestão B2B Moçambique. Todos os direitos reservados.</span>
-    <span class="dashboard-foot__links">
-      <CheckCircle :size="16" class="dashboard-foot__check" />
+    <span class="app-foot__links">
+      <CheckCircle :size="16" class="app-foot__check" />
       <a href="#">Termos de Serviço</a>
       <a href="#">Privacidade</a>
       <a href="#">Ajuda</a>
@@ -15,7 +15,7 @@ import { CheckCircle } from '@lucide/vue'
 </template>
 
 <style scoped>
-.dashboard-foot {
+.app-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,17 +27,17 @@ import { CheckCircle } from '@lucide/vue'
   color: var(--color-muted);
 }
 
-.dashboard-foot__links {
+.app-foot__links {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.dashboard-foot__check {
+.app-foot__check {
   color: var(--brand-primary);
 }
 
-.dashboard-foot__links a {
+.app-foot__links a {
   color: var(--color-muted);
   text-decoration: none;
 }
