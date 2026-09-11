@@ -9,8 +9,6 @@ import OrderStatusDonutChart from '@/features/dashboard/components/OrderStatusDo
 import RecentOrdersTable from '@/features/dashboard/components/RecentOrdersTable.vue'
 import DeliveryProgressCard from '@/features/dashboard/components/DeliveryProgressCard.vue'
 import { kpis, orders, weeklySales } from '@/features/dashboard/data/dashboard.mock'
-
-const crumbs = ['Início', 'Painel', 'Monitorização']
 </script>
 
 <template>
@@ -18,7 +16,7 @@ const crumbs = ['Início', 'Painel', 'Monitorização']
     <DashboardSidebar user-name="João Maputo" user-role="Fornecedor Premium" user-initials="JM" />
 
     <div class="dashboard__main">
-      <DashboardTopbar :crumbs="crumbs" />
+      <DashboardTopbar title="Dashboard" />
 
       <main class="dashboard__content">
         <div class="page-head">
@@ -79,7 +77,8 @@ const crumbs = ['Início', 'Painel', 'Monitorização']
 <style scoped>
 .dashboard {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: var(--color-surface);
 }
 
@@ -88,11 +87,13 @@ const crumbs = ['Início', 'Painel', 'Monitorização']
   flex: 1;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
 }
 
 .dashboard__content {
   flex: 1;
   padding: 28px;
+  overflow-y: auto;
 }
 
 .page-head {

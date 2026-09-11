@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { Search, Bell, ChevronRight } from '@lucide/vue'
+import { Search, Bell, LayoutGrid } from '@lucide/vue'
 
 defineProps<{
-  crumbs: string[]
+  title: string
 }>()
 </script>
 
 <template>
   <header class="topbar">
-    <nav class="crumbs">
-      <template v-for="(crumb, index) in crumbs" :key="crumb">
-        <span :class="{ crumbs__current: index === crumbs.length - 1 }">{{ crumb }}</span>
-        <ChevronRight v-if="index < crumbs.length - 1" :size="14" />
-      </template>
-    </nav>
+    <div class="topbar__title">
+      <span class="topbar__title-icon"><LayoutGrid :size="16" /></span>
+      <span>{{ title }}</span>
+    </div>
 
     <div class="topbar__right">
       <span class="search">
@@ -36,17 +34,25 @@ defineProps<{
   border-bottom: 1px solid var(--color-border);
 }
 
-.crumbs {
+.topbar__title {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--color-muted);
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
 }
 
-.crumbs__current {
-  font-weight: 500;
-  color: var(--color-ink);
+.topbar__title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-primary-tint);
+  color: var(--brand-primary);
 }
 
 .topbar__right {

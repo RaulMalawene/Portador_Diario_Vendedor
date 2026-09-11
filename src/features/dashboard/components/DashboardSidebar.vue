@@ -60,8 +60,10 @@ function logout() {
   flex-direction: column;
   width: 248px;
   flex-shrink: 0;
+  height: 100%;
   padding: 20px 16px;
   border-right: 1px solid var(--color-border);
+  overflow-y: auto;
 }
 
 .sidebar__logo {
