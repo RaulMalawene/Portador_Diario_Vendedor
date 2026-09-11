@@ -70,14 +70,36 @@ defineProps<{ orders: Order[] }>()
 .orders__list {
   display: flex;
   flex-direction: column;
+  max-height: 320px;
   margin: 0;
-  padding: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
   list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.orders__list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.orders__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.orders__list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.orders__list::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
 }
 
 .orders__row {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 6px;
   padding: 14px 0;
   border-bottom: 1px solid var(--color-surface-soft);

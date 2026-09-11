@@ -172,6 +172,7 @@ const crumbs = ['Início', 'Painel', 'Monitorização']
 .grid__side {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 16px;
 }
 
