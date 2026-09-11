@@ -173,7 +173,6 @@ import { kpis, orders, weeklySales } from '@/features/dashboard/data/dashboard.m
 .grid__side {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 16px;
 }
 
