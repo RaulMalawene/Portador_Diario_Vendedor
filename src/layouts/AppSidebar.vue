@@ -20,9 +20,9 @@ function logout() {
 
 <template>
   <aside class="sidebar">
-    <div class="sidebar__logo">
+    <RouterLink to="/home" class="sidebar__logo" aria-label="Ir para o Dashboard">
       <img class="logo__img" :src="logoUrl" alt="Portador Diário" />
-    </div>
+    </RouterLink>
 
     <nav class="nav">
       <component
@@ -70,14 +70,23 @@ function logout() {
 .sidebar__logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 8px 24px;
+  justify-content: center;
+  padding: 12px 8px 24px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: opacity 0.15s;
+}
+
+.sidebar__logo:hover {
+  opacity: 0.85;
 }
 
 .logo__img {
   display: block;
-  height: 36px;
+  height: 52px;
   width: auto;
+  max-width: 100%;
 }
 
 .nav {
