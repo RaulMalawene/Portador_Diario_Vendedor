@@ -47,8 +47,8 @@ function toggleSort() {
         </th>
         <th>SKU</th>
         <th>Categoria</th>
-        <th class="ta-right">Preço (MZN)</th>
-        <th class="ta-right">Stock</th>
+        <th>Preço (MZN)</th>
+        <th>Stock</th>
         <th>Estado</th>
         <th class="ta-right">Ações</th>
       </tr>
@@ -65,8 +65,8 @@ function toggleSort() {
         <td class="td-strong td-truncate">{{ product.name }}</td>
         <td class="td-mono td-truncate">{{ product.sku }}</td>
         <td class="td-muted td-truncate">{{ product.categoria }}</td>
-        <td class="ta-right td-mono">{{ product.preco }} MT</td>
-        <td class="ta-right td-mono" :class="{ 'td-zero': product.stock === 0 }">
+        <td class="td-mono">{{ product.preco }} MT</td>
+        <td class="td-mono" :class="{ 'td-zero': product.stock === 0 }">
           {{ product.stock }}
         </td>
         <td>
@@ -95,11 +95,11 @@ function toggleSort() {
 }
 
 .col-name {
-  width: 26%;
+  width: 30%;
 }
 
 .col-sku {
-  width: 14%;
+  width: 13%;
 }
 
 .col-category {
@@ -107,15 +107,15 @@ function toggleSort() {
 }
 
 .col-price {
-  width: 14%;
+  width: 12%;
 }
 
 .col-stock {
-  width: 10%;
+  width: 9%;
 }
 
 .col-status {
-  width: 12%;
+  width: 13%;
 }
 
 .col-actions {
