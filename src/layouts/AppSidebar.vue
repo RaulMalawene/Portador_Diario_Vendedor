@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter, RouterLink, useRoute } from 'vue-router'
-import { Package, Settings, LogOut } from '@lucide/vue'
+import { Package, LogOut } from '@lucide/vue'
 import { navItems } from './navigation'
 
 defineProps<{
@@ -39,13 +39,14 @@ function logout() {
     </nav>
 
     <div class="sidebar__foot">
-      <a href="#" class="nav__item"><Settings :size="20" /><span>Definições</span></a>
       <div class="user">
-        <span class="user__avatar">{{ userInitials }}</span>
-        <span class="user__info">
-          <span class="user__name">{{ userName }}</span>
-          <span class="user__role">{{ userRole }}</span>
-        </span>
+        <RouterLink to="/perfil" class="user__link" aria-label="Ver e editar perfil">
+          <span class="user__avatar">{{ userInitials }}</span>
+          <span class="user__info">
+            <span class="user__name">{{ userName }}</span>
+            <span class="user__role">{{ userRole }}</span>
+          </span>
+        </RouterLink>
         <button class="user__logout" type="button" aria-label="Terminar sessão" @click="logout">
           <LogOut :size="18" />
         </button>
@@ -133,10 +134,27 @@ function logout() {
 .user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
   margin-top: 8px;
-  padding: 10px 8px;
+  padding: 6px;
   border-top: 1px solid var(--color-border);
+}
+
+.user__link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.user__link:hover {
+  background: var(--color-surface-soft);
 }
 
 .user__avatar {
@@ -172,13 +190,18 @@ function logout() {
 
 .user__logout {
   display: flex;
+  flex-shrink: 0;
+  padding: 6px;
   border: 0;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-muted);
   cursor: pointer;
+  transition: background 0.15s;
 }
 
 .user__logout:hover {
+  background: var(--color-surface-soft);
   color: var(--color-danger);
 }
 
