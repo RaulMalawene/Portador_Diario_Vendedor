@@ -34,7 +34,7 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
 </script>
 
 <template>
-  <AppModal v-model="isOpen" size="sm" labelled-by="stock-adjust-title">
+  <AppModal v-model="isOpen" size="md" labelled-by="stock-adjust-title">
     <h2 id="stock-adjust-title" class="modal__title">Ajustar Stock</h2>
 
     <form class="modal__body" novalidate @submit.prevent="emit('submit')">
@@ -51,32 +51,34 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
         </div>
       </label>
 
-      <span class="field__label">Tipo de Movimento</span>
-      <div class="segment">
-        <button
-          type="button"
-          class="segment__btn"
-          :class="{ 'is-active': form.type === 'in' }"
-          @click="form.type = 'in'"
-        >
-          <ArrowDownToLine :size="16" /> Entrada
-        </button>
-        <button
-          type="button"
-          class="segment__btn"
-          :class="{ 'is-active': form.type === 'out' }"
-          @click="form.type = 'out'"
-        >
-          <ArrowUpFromLine :size="16" /> Saída
-        </button>
-        <button
-          type="button"
-          class="segment__btn"
-          :class="{ 'is-active': form.type === 'adjustment' }"
-          @click="form.type = 'adjustment'"
-        >
-          <Pencil :size="16" /> Correcção
-        </button>
+      <div class="field">
+        <span class="field__label">Tipo de Movimento</span>
+        <div class="segment">
+          <button
+            type="button"
+            class="segment__btn"
+            :class="{ 'is-active': form.type === 'in' }"
+            @click="form.type = 'in'"
+          >
+            <ArrowDownToLine :size="16" /> Entrada
+          </button>
+          <button
+            type="button"
+            class="segment__btn"
+            :class="{ 'is-active': form.type === 'out' }"
+            @click="form.type = 'out'"
+          >
+            <ArrowUpFromLine :size="16" /> Saída
+          </button>
+          <button
+            type="button"
+            class="segment__btn"
+            :class="{ 'is-active': form.type === 'adjustment' }"
+            @click="form.type = 'adjustment'"
+          >
+            <Pencil :size="16" /> Correcção
+          </button>
+        </div>
       </div>
 
       <label class="field">
@@ -198,8 +200,7 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
 
 .segment {
   display: flex;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: 10px;
 }
 
 .segment__btn {
@@ -208,7 +209,7 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 42px;
+  height: 44px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -217,6 +218,10 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
   font-weight: 600;
   color: var(--color-body);
   cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .segment__btn:hover {

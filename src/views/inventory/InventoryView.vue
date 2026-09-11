@@ -101,6 +101,7 @@ function openHistory(item: InventoryItem) {
         :value="formatCurrency(kpis.totalValue)"
         note="ao preço de catálogo"
         :icon="Boxes"
+        compact
       />
     </section>
 

@@ -8,9 +8,11 @@ withDefaults(
     note: string
     icon: Component
     tone?: 'brand' | 'warning' | 'danger'
+    compact?: boolean
   }>(),
   {
     tone: 'brand',
+    compact: false,
   },
 )
 </script>
@@ -19,7 +21,9 @@ withDefaults(
   <article class="kpi">
     <div class="kpi__body">
       <span class="kpi__label">{{ label }}</span>
-      <div class="kpi__value" :class="`kpi__value--${tone}`">{{ value }}</div>
+      <div class="kpi__value" :class="[`kpi__value--${tone}`, { 'kpi__value--compact': compact }]">
+        {{ value }}
+      </div>
       <span class="kpi__note">{{ note }}</span>
     </div>
     <span class="kpi__icon" :class="`kpi__icon--${tone}`">
@@ -54,6 +58,11 @@ withDefaults(
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
+}
+
+.kpi__value--compact {
+  font-size: 22px;
+  letter-spacing: -0.01em;
 }
 
 .kpi__value--warning {
