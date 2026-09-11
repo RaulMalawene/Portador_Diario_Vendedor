@@ -182,7 +182,7 @@ function goBack() {
         </div>
       </transition>
 
-      <section class="card stepper-card">
+      <section class="card">
         <OrderStatusStepper v-if="order.status !== 'cancelled'" :status="order.status" />
         <div v-else class="cancelled-notice">
           <PackageX :size="20" />
@@ -256,7 +256,7 @@ function goBack() {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  padding: 24px 26px;
+  padding: 24px 28px;
   margin-bottom: 16px;
   border-radius: var(--radius-lg);
   background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%);
@@ -283,8 +283,8 @@ function goBack() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.12);
@@ -331,7 +331,7 @@ function goBack() {
 .stat-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 16px;
 }
 
@@ -349,7 +349,7 @@ function goBack() {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -357,8 +357,9 @@ function goBack() {
 }
 
 .stat-chip__value {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
 }
@@ -457,10 +458,6 @@ function goBack() {
   color: var(--color-body);
 }
 
-.stepper-card {
-  padding: 26px 22px 20px;
-}
-
 .cancelled-notice {
   display: flex;
   align-items: center;
@@ -486,11 +483,6 @@ function goBack() {
   grid-template-columns: 320px 1fr;
   align-items: start;
   gap: 16px;
-}
-
-.col-side .card,
-.col-main .card {
-  margin-bottom: 16px;
 }
 
 .not-found {

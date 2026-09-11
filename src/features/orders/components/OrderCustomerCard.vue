@@ -42,8 +42,8 @@ async function copyAddress() {
         <MapPin :size="15" />
         <span>{{ customer.address }}</span>
         <button class="copy-btn" type="button" aria-label="Copiar morada" @click="copyAddress">
-          <Check v-if="copied" :size="13" />
-          <Copy v-else :size="13" />
+          <Check v-if="copied" :size="14" />
+          <Copy v-else :size="14" />
         </button>
       </li>
     </ul>
@@ -124,8 +124,8 @@ async function copyAddress() {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   margin-left: auto;
   border: 0;
   border-radius: var(--radius-sm);

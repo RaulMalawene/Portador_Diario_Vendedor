@@ -57,7 +57,7 @@ const total = computed(() => orderTotal(props.items))
 }
 
 .table th {
-  padding: 10px 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--color-border);
   font-size: 12px;
   font-weight: 600;
@@ -66,7 +66,7 @@ const total = computed(() => orderTotal(props.items))
 }
 
 .table td {
-  padding: 14px 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--color-surface-soft);
   font-size: 14px;
 }
