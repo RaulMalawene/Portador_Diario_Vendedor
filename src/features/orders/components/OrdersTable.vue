@@ -46,8 +46,8 @@ function openOrder(order: Order) {
         </th>
         <th>Cliente</th>
         <th>Data</th>
-        <th class="ta-right">Itens</th>
-        <th class="ta-right">Total</th>
+        <th>Itens</th>
+        <th>Total</th>
         <th>Estado</th>
         <th class="col-actions"></th>
       </tr>
@@ -67,8 +67,8 @@ function openOrder(order: Order) {
         <td class="td-strong td-mono">{{ order.number }}</td>
         <td class="td-truncate">{{ order.customer.name }}</td>
         <td class="td-muted td-mono">{{ order.placedAt.split(' às')[0] }}</td>
-        <td class="ta-right td-mono">{{ itemsCount(order) }}</td>
-        <td class="ta-right td-mono td-strong">{{ formatMoney(orderTotal(order.items)) }}</td>
+        <td class="td-mono">{{ itemsCount(order) }}</td>
+        <td class="td-mono td-strong">{{ formatMoney(orderTotal(order.items)) }}</td>
         <td>
           <StatusBadge :variant="statusBadge(order.status)">{{
             statusLabel(order.status)

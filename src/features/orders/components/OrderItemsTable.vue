@@ -19,9 +19,9 @@ const total = computed(() => orderTotal(props.items))
       <tr>
         <th>Ref</th>
         <th>Produto</th>
-        <th class="ta-right">Quantidade</th>
-        <th class="ta-right">Unitário</th>
-        <th class="ta-right">Subtotal</th>
+        <th>Quantidade</th>
+        <th>Unitário</th>
+        <th>Subtotal</th>
       </tr>
     </thead>
     <tbody>
@@ -37,9 +37,9 @@ const total = computed(() => orderTotal(props.items))
             <AlertTriangle :size="13" /> stock insuficiente
           </span>
         </td>
-        <td class="ta-right td-mono">{{ item.quantity }}</td>
-        <td class="ta-right td-mono td-muted">{{ formatMoney(item.unitPrice) }}</td>
-        <td class="ta-right td-mono td-strong">{{ formatMoney(subtotal(item)) }}</td>
+        <td class="td-mono">{{ item.quantity }}</td>
+        <td class="td-mono td-muted">{{ formatMoney(item.unitPrice) }}</td>
+        <td class="td-mono td-strong">{{ formatMoney(subtotal(item)) }}</td>
       </tr>
     </tbody>
   </table>
@@ -86,10 +86,6 @@ const total = computed(() => orderTotal(props.items))
 
 .td-muted {
   color: var(--color-body);
-}
-
-.ta-right {
-  text-align: right;
 }
 
 .shortage {

@@ -51,6 +51,10 @@ async function copyAddress() {
 </template>
 
 <style scoped>
+.customer {
+  margin-top: 16px;
+}
+
 .customer__head {
   display: flex;
   align-items: center;
