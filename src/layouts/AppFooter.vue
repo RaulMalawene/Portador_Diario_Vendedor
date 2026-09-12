@@ -4,7 +4,7 @@ import { CheckCircle } from '@lucide/vue'
 
 <template>
   <footer class="app-foot">
-    <span>© 2026 Vendor Portal - Gestão B2B Moçambique. Todos os direitos reservados.</span>
+  
     <span class="app-foot__links">
       <CheckCircle :size="16" class="app-foot__check" />
       <a href="#">Termos de Serviço</a>
