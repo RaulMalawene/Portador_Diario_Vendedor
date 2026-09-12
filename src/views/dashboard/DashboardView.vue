@@ -8,18 +8,21 @@ import OrderStatusDonutChart from '@/features/dashboard/components/OrderStatusDo
 import RecentOrdersTable from '@/features/dashboard/components/RecentOrdersTable.vue'
 import DeliveryProgressCard from '@/features/dashboard/components/DeliveryProgressCard.vue'
 import { kpis, orders, weeklySales } from '@/features/dashboard/data/dashboard.mock'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 </script>
 
 <template>
   <AppShell
     title="Dashboard"
-    user-name="João Maputo"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    user-initials="JM"
+    :user-initials="authStore.initials"
   >
     <div class="page-head">
       <div>
-        <h1 class="page-title">Bem-vindo, João Maputo</h1>
+        <h1 class="page-title">Bem-vindo, {{ authStore.user?.name }}</h1>
         <p class="page-sub">Monitorize o desempenho do seu negócio em tempo real.</p>
       </div>
       <div class="page-actions">

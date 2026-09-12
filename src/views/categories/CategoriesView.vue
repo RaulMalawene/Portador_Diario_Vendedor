@@ -9,6 +9,9 @@ import CategoryFormModal from '@/features/categories/components/CategoryFormModa
 import { useCategories } from '@/features/categories/composables/useCategories'
 import { useCategoryForm } from '@/features/categories/composables/useCategoryForm'
 import type { Category } from '@/features/categories/types/categories.types'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const { categories, upsert, remove, toggleActive } = useCategories()
 const { isOpen, isEditing, editingId, form, openCreate, openEdit, close } = useCategoryForm()
@@ -46,9 +49,9 @@ function handleSubmit() {
 <template>
   <AppShell
     title="Categorias"
-    user-name="João Maputo"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    user-initials="JM"
+    :user-initials="authStore.initials"
   >
     <div class="page-head">
       <div>

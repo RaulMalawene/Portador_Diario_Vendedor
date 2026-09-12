@@ -28,6 +28,9 @@ import {
   statusBadge,
   statusLabel,
 } from '@/features/orders/utils/orders'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -95,9 +98,9 @@ function goBack() {
 <template>
   <AppShell
     title="Encomendas"
-    user-name="João Maputo"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    user-initials="JM"
+    :user-initials="authStore.initials"
   >
     <template v-if="order">
       <button class="back" type="button" @click="goBack">

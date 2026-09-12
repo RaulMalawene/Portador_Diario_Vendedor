@@ -8,6 +8,9 @@ import OrdersTable from '@/features/orders/components/OrdersTable.vue'
 import OrderKpiCard from '@/features/orders/components/OrderKpiCard.vue'
 import { useOrders } from '@/features/orders/composables/useOrders'
 import { formatMoney } from '@/features/orders/utils/orders'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const { orders, kpis } = useOrders()
 
@@ -30,9 +33,9 @@ const filteredOrders = computed(() =>
 <template>
   <AppShell
     title="Encomendas"
-    user-name="João Maputo"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    user-initials="JM"
+    :user-initials="authStore.initials"
   >
     <div class="page-head">
       <div>

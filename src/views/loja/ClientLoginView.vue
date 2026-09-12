@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { Globe } from '@lucide/vue'
 import BrandShowcase from '@/features/auth/components/BrandShowcase.vue'
 import ClientLoginForm from '@/features/loja/components/ClientLoginForm.vue'
-import { API_BASE_URL } from '@/features/loja/api/httpClient'
+import { API_BASE_URL } from '@/services/apiClient'
 
 const router = useRouter()
 

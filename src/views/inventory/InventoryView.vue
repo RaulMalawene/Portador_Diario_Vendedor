@@ -12,6 +12,9 @@ import { useInventory } from '@/features/inventory/composables/useInventory'
 import { useStockAdjustForm } from '@/features/inventory/composables/useStockAdjustForm'
 import { formatCurrency, stockStatus } from '@/features/inventory/utils/inventory'
 import type { InventoryItem } from '@/features/inventory/types/inventory.types'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const { items, kpis, movementsFor, adjustStock } = useInventory()
 const {
@@ -56,9 +59,9 @@ function openHistory(item: InventoryItem) {
 <template>
   <AppShell
     title="Inventário"
-    user-name="João Maputo"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    user-initials="JM"
+    :user-initials="authStore.initials"
   >
     <div class="page-head">
       <div>

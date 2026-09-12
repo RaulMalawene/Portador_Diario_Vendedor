@@ -1,10 +1,11 @@
 import { reactive, ref } from 'vue'
 import type { LoginCredentials, LoginFieldErrors } from '../types/auth.types'
-import { login } from '../services/auth.service'
+import { useAuthStore } from '@/stores/auth'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function useLoginForm() {
+  const authStore = useAuthStore()
   const form = reactive<LoginCredentials>({ email: '', password: '', remember: false })
   const fieldErrors = reactive<LoginFieldErrors>({})
   const loading = ref(false)
@@ -28,15 +29,15 @@ export function useLoginForm() {
     if (!validate()) return false
 
     loading.value = true
-    try {
-      await login({ ...form })
-      return true
-    } catch {
-      formError.value = 'Não foi possível iniciar sessão. Verifique as suas credenciais.'
+    const result = await authStore.login(form.email, form.password)
+    loading.value = false
+
+    if (!result.ok) {
+      formError.value = result.error ?? 'Não foi possível iniciar sessão. Verifique as suas credenciais.'
       return false
-    } finally {
-      loading.value = false
     }
+
+    return true
   }
 
   return {

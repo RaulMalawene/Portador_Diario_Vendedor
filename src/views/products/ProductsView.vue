@@ -9,6 +9,9 @@ import ProductFormModal from '@/features/products/components/ProductFormModal.vu
 import { useProducts } from '@/features/products/composables/useProducts'
 import { useProductForm } from '@/features/products/composables/useProductForm'
 import type { Product } from '@/features/products/types/products.types'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 const { products, upsert, remove, toggleActive } = useProducts()
 const { isOpen, isEditing, editingSku, form, openCreate, openEdit, close } = useProductForm()
@@ -47,9 +50,9 @@ function handleSubmit() {
 <template>
   <AppShell
     title="Produtos"
-    user-name="João Maputo"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    user-initials="JM"
+    :user-initials="authStore.initials"
   >
     <div class="page-head">
       <div>

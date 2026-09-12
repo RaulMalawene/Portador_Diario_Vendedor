@@ -2,6 +2,7 @@
 import { useRouter, RouterLink, useRoute } from 'vue-router'
 import { LogOut } from '@lucide/vue'
 import { navItems } from './navigation'
+import { useAuthStore } from '@/stores/auth'
 import logoUrl from '@/assets/Logotipo.svg'
 
 defineProps<{
@@ -12,8 +13,10 @@ defineProps<{
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 function logout() {
+  authStore.logout()
   router.push('/login')
 }
 </script>

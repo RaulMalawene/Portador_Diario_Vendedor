@@ -15,9 +15,6 @@ export interface RegisterPayload {
   password: string
   confirmPassword: string
   companyName: string
-  taxId: string
-  phone: string
-  address: string
 }
 
 export interface RegisterFieldErrors {
@@ -26,9 +23,6 @@ export interface RegisterFieldErrors {
   password?: string
   confirmPassword?: string
   companyName?: string
-  taxId?: string
-  phone?: string
-  address?: string
 }
 
 export interface ForgotPasswordFieldErrors {

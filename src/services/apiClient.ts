@@ -1,10 +1,10 @@
-// Cliente HTTP fino para a Área do Cliente (src/features/loja), a falar com
-// a API real em E:\Vendor-back (Laravel + Sanctum, tokens Bearer).
+// Cliente HTTP fino e partilhado para falar com a API real em E:\Vendor-back
+// (Laravel + Sanctum, tokens Bearer) — usado tanto pelo login do fornecedor
+// (src/features/auth) como pela Área do Cliente de teste (src/features/loja).
 //
 // Não lança excepções: cada pedido devolve sempre um resultado tipado com o
 // estado HTTP e a mensagem de erro (extraída do JSON de validação do
-// Laravel quando existe), para os ecrãs mostrarem o que o backend respondeu
-// — importante ao testar pedidos simultâneos.
+// Laravel quando existe).
 
 const DEFAULT_BASE_URL = 'http://localhost:8000/api'
 

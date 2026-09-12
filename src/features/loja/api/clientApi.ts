@@ -1,4 +1,4 @@
-import { apiRequest } from './httpClient'
+import { apiRequest } from '@/services/apiClient'
 import type { AuthenticatedUser, CatalogProduct, ClientOrder, Customer } from '../types/client.types'
 
 interface Collection<T> {

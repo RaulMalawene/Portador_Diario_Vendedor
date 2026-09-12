@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { User, Mail, Lock, Building2, Hash, Phone, MapPin } from '@lucide/vue'
+import { User, Mail, Lock, Building2 } from '@lucide/vue'
 import AuthLogo from './AuthLogo.vue'
 import AuthTextField from './AuthTextField.vue'
 import AuthSubmitButton from './AuthSubmitButton.vue'
@@ -101,37 +101,6 @@ async function onSubmit() {
           autocomplete="organization"
           placeholder="Ex: Comercial Maputo, Lda"
           :error="fieldErrors.companyName"
-        />
-
-        <AuthTextField
-          id="register-tax-id"
-          v-model="form.taxId"
-          label="NUIT"
-          :icon="Hash"
-          autocomplete="off"
-          placeholder="900000000"
-          :error="fieldErrors.taxId"
-        />
-
-        <AuthTextField
-          id="register-phone"
-          v-model="form.phone"
-          label="Contacto"
-          type="tel"
-          :icon="Phone"
-          autocomplete="tel"
-          placeholder="+258 84 000 0000"
-          :error="fieldErrors.phone"
-        />
-
-        <AuthTextField
-          id="register-address"
-          v-model="form.address"
-          label="Endereço"
-          :icon="MapPin"
-          autocomplete="street-address"
-          placeholder="Av. Julius Nyerere, Maputo"
-          :error="fieldErrors.address"
         />
 
         <div class="register-form__actions">

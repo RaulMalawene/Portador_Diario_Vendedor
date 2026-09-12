@@ -1,12 +1,12 @@
 import { reactive, ref } from 'vue'
 import type { RegisterFieldErrors, RegisterPayload } from '../types/auth.types'
-import { register } from '../services/auth.service'
+import { useAuthStore } from '@/stores/auth'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PASSWORD_PATTERN = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
-const TAX_ID_PATTERN = /^\d{9}$/
 
 export function useRegisterForm() {
+  const authStore = useAuthStore()
   const step = ref(1)
 
   const form = reactive<RegisterPayload>({
@@ -15,9 +15,6 @@ export function useRegisterForm() {
     password: '',
     confirmPassword: '',
     companyName: '',
-    taxId: '',
-    phone: '',
-    address: '',
   })
 
   const fieldErrors = reactive<RegisterFieldErrors>({})
@@ -53,18 +50,7 @@ export function useRegisterForm() {
   function validateCompanyStep(): boolean {
     fieldErrors.companyName = form.companyName ? undefined : 'O nome da empresa é obrigatório'
 
-    fieldErrors.taxId = !form.taxId
-      ? 'O NUIT é obrigatório'
-      : !TAX_ID_PATTERN.test(form.taxId)
-        ? 'O NUIT deve ter 9 dígitos'
-        : undefined
-
-    fieldErrors.phone = form.phone ? undefined : 'O contacto é obrigatório'
-    fieldErrors.address = form.address ? undefined : 'O endereço é obrigatório'
-
-    return (
-      !fieldErrors.companyName && !fieldErrors.taxId && !fieldErrors.phone && !fieldErrors.address
-    )
+    return !fieldErrors.companyName
   }
 
   function goToNextStep() {
@@ -83,15 +69,21 @@ export function useRegisterForm() {
     if (!validateCompanyStep()) return false
 
     loading.value = true
-    try {
-      await register({ ...form })
-      return true
-    } catch {
-      formError.value = 'Não foi possível concluir o registo. Tente novamente.'
+    const result = await authStore.register({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      passwordConfirmation: form.confirmPassword,
+      companyName: form.companyName,
+    })
+    loading.value = false
+
+    if (!result.ok) {
+      formError.value = result.error
       return false
-    } finally {
-      loading.value = false
     }
+
+    return true
   }
 
   return {

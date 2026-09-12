@@ -7,7 +7,7 @@ import ClientOrdersList from '@/features/loja/components/ClientOrdersList.vue'
 import { useClientSession } from '@/features/loja/composables/useClientSession'
 import { useClientOrders } from '@/features/loja/composables/useClientOrders'
 import { logoutRequest } from '@/features/loja/api/clientApi'
-import { API_BASE_URL } from '@/features/loja/api/httpClient'
+import { API_BASE_URL } from '@/services/apiClient'
 
 const router = useRouter()
 const { session, clearSession } = useClientSession()
