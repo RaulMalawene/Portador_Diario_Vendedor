@@ -91,11 +91,6 @@ function handleAdd() {
     >
       <component :is="lastOrderFeedback.ok ? CheckCircle2 : AlertTriangle" :size="15" />
       {{ lastOrderFeedback.message }}
-      <span class="order-panel__latency">
-        ({{ lastOrderFeedback.durationMs }} ms<template v-if="lastOrderFeedback.status">
-          · HTTP {{ lastOrderFeedback.status }}</template
-        >)
-      </span>
     </p>
   </section>
 </template>
@@ -310,11 +305,6 @@ function handleAdd() {
 
 .order-panel__result.is-error {
   color: var(--color-danger);
-}
-
-.order-panel__latency {
-  font-weight: 500;
-  color: var(--color-muted);
 }
 
 @media (max-width: 560px) {

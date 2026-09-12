@@ -1,15 +1,27 @@
 import { computed, ref } from 'vue'
-import { createOrderRequest, fetchOrdersRequest } from '../api/clientApi'
 import { catalog } from '../data/catalog'
+import { mockClientOrders } from '../data/clientOrders.mock'
 import type { ClientCartItem, ClientOrder, RequestFeedback } from '../types/client.types'
 
-export function useClientOrders(getToken: () => string | null) {
+// Versão só de design: tudo corre localmente, sem chamadas ao backend.
+// TODO: quando tiveres a API, substitui o corpo de `submitOrder` e
+// `loadOrders` por pedidos reais (mantendo a mesma assinatura, os
+// componentes não precisam de mudar).
+
+function makeOrderNumber(): string {
+  return String(Math.floor(1000 + Math.random() * 9000))
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export function useClientOrders() {
   const cart = ref<ClientCartItem[]>([])
-  const orders = ref<ClientOrder[]>([])
+  const orders = ref<ClientOrder[]>([...mockClientOrders])
   const isSubmitting = ref(false)
   const isLoadingOrders = ref(false)
   const lastOrderFeedback = ref<RequestFeedback | null>(null)
-  const ordersError = ref<string | null>(null)
 
   const cartTotal = computed(() =>
     cart.value.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
@@ -29,42 +41,31 @@ export function useClientOrders(getToken: () => string | null) {
   }
 
   async function submitOrder() {
-    const token = getToken()
-    if (!token || cart.value.length === 0) return
+    if (cart.value.length === 0) return
 
     isSubmitting.value = true
-    const result = await createOrderRequest(token, cart.value)
+    lastOrderFeedback.value = null
+    await wait(500)
+
+    const order: ClientOrder = {
+      id: `local-${Date.now()}`,
+      number: makeOrderNumber(),
+      status: 'pending',
+      total: cartTotal.value,
+      createdAt: new Date().toISOString(),
+      items: cart.value.map((item) => ({ ...item })),
+    }
+
+    orders.value.unshift(order)
+    cart.value = []
     isSubmitting.value = false
-
-    lastOrderFeedback.value = {
-      ok: result.ok,
-      status: result.status,
-      durationMs: result.durationMs,
-      message: result.ok
-        ? 'Encomenda enviada com sucesso.'
-        : (result.error ?? 'Falha ao enviar a encomenda.'),
-    }
-
-    if (result.ok && result.data) {
-      orders.value.unshift(result.data)
-      cart.value = []
-    }
+    lastOrderFeedback.value = { ok: true, message: 'Encomenda enviada com sucesso.' }
   }
 
   async function loadOrders() {
-    const token = getToken()
-    if (!token) return
-
     isLoadingOrders.value = true
-    const result = await fetchOrdersRequest(token)
+    await wait(400)
     isLoadingOrders.value = false
-
-    if (result.ok && result.data) {
-      orders.value = result.data.orders
-      ordersError.value = null
-    } else {
-      ordersError.value = result.error ?? 'Não foi possível obter as encomendas.'
-    }
   }
 
   return {
@@ -74,7 +75,6 @@ export function useClientOrders(getToken: () => string | null) {
     isSubmitting,
     isLoadingOrders,
     lastOrderFeedback,
-    ordersError,
     addToCart,
     removeFromCart,
     submitOrder,

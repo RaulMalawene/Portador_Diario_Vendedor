@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { AlertCircle, LogIn } from '@lucide/vue'
-import { loginRequest } from '../api/clientApi'
 import { useClientSession } from '../composables/useClientSession'
+
+// Versão só de design: aceita qualquer email/palavra-passe e simula um
+// pequeno atraso de rede, sem chamar nenhum backend.
+// TODO: quando tiveres a API, substitui o corpo de handleSubmit por um
+// pedido real de login (o resto do formulário não precisa de mudar).
 
 const emit = defineEmits<{ success: [] }>()
 
@@ -12,7 +16,17 @@ const email = ref('')
 const password = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
-const lastLatency = ref<number | null>(null)
+
+function customerNameFromEmail(value: string): string {
+  const [handle] = value.split('@')
+  if (!handle) return 'Cliente'
+  return handle
+    .replace(/[._-]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0]!.toUpperCase() + part.slice(1))
+    .join(' ')
+}
 
 async function handleSubmit() {
   if (!email.value || !password.value || isSubmitting.value) return
@@ -20,16 +34,17 @@ async function handleSubmit() {
   isSubmitting.value = true
   errorMessage.value = ''
 
-  const result = await loginRequest(email.value.trim(), password.value)
+  await new Promise((resolve) => setTimeout(resolve, 500))
   isSubmitting.value = false
-  lastLatency.value = result.durationMs
 
-  if (!result.ok || !result.data) {
-    errorMessage.value = result.error ?? 'Não foi possível iniciar sessão.'
-    return
-  }
-
-  setSession({ token: result.data.token, customer: result.data.customer })
+  setSession({
+    token: 'demo-token',
+    customer: {
+      id: 'demo-customer',
+      name: customerNameFromEmail(email.value.trim()),
+      email: email.value.trim(),
+    },
+  })
   emit('success')
 }
 </script>
@@ -68,10 +83,6 @@ async function handleSubmit() {
       <LogIn :size="16" />
       {{ isSubmitting ? 'A entrar...' : 'Entrar' }}
     </button>
-
-    <p v-if="lastLatency !== null" class="client-login-form__meta">
-      Última resposta do servidor: {{ lastLatency }} ms
-    </p>
   </form>
 </template>
 
@@ -148,12 +159,5 @@ async function handleSubmit() {
 .btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-}
-
-.client-login-form__meta {
-  margin: 14px 0 0;
-  font-size: 12px;
-  color: var(--color-muted);
-  text-align: center;
 }
 </style>

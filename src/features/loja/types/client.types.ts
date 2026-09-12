@@ -25,10 +25,8 @@ export interface ClientOrder {
   items: ClientCartItem[]
 }
 
-/** Resultado do último pedido feito ao backend, para mostrar no ecrã. */
+/** Resultado da última acção (enviar encomenda, etc.), para mostrar no ecrã. */
 export interface RequestFeedback {
   ok: boolean
-  status: number | null
-  durationMs: number
   message: string
 }

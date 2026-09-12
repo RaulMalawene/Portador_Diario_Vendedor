@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ClientPortalHeader from '@/features/loja/components/ClientPortalHeader.vue'
 import NewOrderPanel from '@/features/loja/components/NewOrderPanel.vue'
@@ -7,7 +6,6 @@ import ClientOrdersList from '@/features/loja/components/ClientOrdersList.vue'
 import { useClientSession } from '@/features/loja/composables/useClientSession'
 import { useClientOrders } from '@/features/loja/composables/useClientOrders'
 import { catalog } from '@/features/loja/data/catalog'
-import { API_BASE_URL } from '@/features/loja/api/httpClient'
 
 const router = useRouter()
 const { session, clearSession } = useClientSession()
@@ -19,29 +17,21 @@ const {
   isSubmitting,
   isLoadingOrders,
   lastOrderFeedback,
-  ordersError,
   addToCart,
   removeFromCart,
   submitOrder,
   loadOrders,
-} = useClientOrders(() => session.value?.token ?? null)
+} = useClientOrders()
 
 function handleLogout() {
   clearSession()
   router.push('/loja/login')
 }
-
-onMounted(() => {
-  loadOrders()
-})
 </script>
 
 <template>
   <div class="client-orders-view">
-    <ClientPortalHeader
-      :customer-name="session?.customer.name ?? ''"
-      @logout="handleLogout"
-    />
+    <ClientPortalHeader :customer-name="session?.customer.name ?? ''" @logout="handleLogout" />
 
     <main class="client-orders-view__body">
       <NewOrderPanel
@@ -55,15 +45,8 @@ onMounted(() => {
         @submit="submitOrder"
       />
 
-      <ClientOrdersList
-        :orders="orders"
-        :is-loading="isLoadingOrders"
-        :error="ordersError"
-        @refresh="loadOrders"
-      />
+      <ClientOrdersList :orders="orders" :is-loading="isLoadingOrders" @refresh="loadOrders" />
     </main>
-
-    <footer class="client-orders-view__footer">A ligar a: {{ API_BASE_URL }}</footer>
   </div>
 </template>
 
@@ -85,13 +68,6 @@ onMounted(() => {
   width: 100%;
   margin: 0 auto;
   padding: 24px;
-}
-
-.client-orders-view__footer {
-  padding: 14px 24px;
-  font-size: 12px;
-  color: var(--color-muted);
-  text-align: center;
 }
 
 @media (max-width: 800px) {

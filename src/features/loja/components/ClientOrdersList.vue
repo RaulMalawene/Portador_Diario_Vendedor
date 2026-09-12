@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, PackageSearch, RefreshCw } from '@lucide/vue'
+import { PackageSearch, RefreshCw } from '@lucide/vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { formatMoney } from '@/features/orders/utils/orders'
 import { orderStatusMeta } from '../utils/clientOrders'
@@ -8,7 +8,6 @@ import type { ClientOrder } from '../types/client.types'
 defineProps<{
   orders: ClientOrder[]
   isLoading: boolean
-  error: string | null
 }>()
 
 const emit = defineEmits<{ refresh: [] }>()
@@ -34,8 +33,6 @@ function formatDate(value: string): string {
       </button>
     </div>
 
-    <p v-if="error" class="orders-panel__error"><AlertCircle :size="15" /> {{ error }}</p>
-
     <ul v-if="orders.length" class="orders-list">
       <li v-for="order in orders" :key="order.id" class="orders-list__item">
         <div class="orders-list__main">
@@ -49,7 +46,7 @@ function formatDate(value: string): string {
       </li>
     </ul>
 
-    <div v-else-if="!error" class="orders-panel__empty">
+    <div v-else class="orders-panel__empty">
       <PackageSearch :size="28" />
       <p>Ainda não tem encomendas.</p>
     </div>
@@ -108,15 +105,6 @@ function formatDate(value: string): string {
 
 .orders-panel__refresh .is-spinning {
   animation: orders-panel-spin 0.8s linear infinite;
-}
-
-.orders-panel__error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 16px;
-  font-size: 13px;
-  color: var(--color-danger);
 }
 
 .orders-list {
