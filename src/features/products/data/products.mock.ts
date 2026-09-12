@@ -1,6 +1,9 @@
+import { categoryNames } from '@/features/categories/data/categoryNames'
 import type { Product } from '../types/products.types'
 
-export const categories = ['Alimentação', 'Bebidas', 'Limpeza', 'Higiene', 'Diversos']
+// Reutiliza a mesma lista de nomes usada no ecrã de Categorias, para que
+// os dois ecrãs fiquem sempre em concordância.
+export const categories: string[] = [...categoryNames]
 
 export const products: Product[] = [
   {

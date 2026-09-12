@@ -26,7 +26,9 @@ defineProps<{ orders: Order[] }>()
         <div class="orders__row-meta">
           <span class="orders__date">{{ order.data }}</span>
           <span class="orders__value">{{ order.valor }}</span>
-          <StatusBadge :variant="badgeVariant(order.estado)">{{ order.estado }}</StatusBadge>
+          <span class="orders__status">
+            <StatusBadge :variant="badgeVariant(order.estado)">{{ order.estado }}</StatusBadge>
+          </span>
         </div>
       </li>
     </ul>
@@ -130,15 +132,16 @@ defineProps<{ orders: Order[] }>()
 }
 
 .orders__row-meta {
-  display: flex;
+  display: grid;
+  grid-template-columns: 74px 1fr 96px;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
 }
 
 .orders__date {
   font-size: 12px;
   color: var(--color-muted);
+  text-align: left;
 }
 
 .orders__value {
@@ -146,5 +149,11 @@ defineProps<{ orders: Order[] }>()
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
+  text-align: center;
+}
+
+.orders__status {
+  display: flex;
+  justify-content: center;
 }
 </style>
