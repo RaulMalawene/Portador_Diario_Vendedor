@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { Globe } from '@lucide/vue'
 import BrandShowcase from '@/features/auth/components/BrandShowcase.vue'
 import ClientLoginForm from '@/features/loja/components/ClientLoginForm.vue'
+import { API_BASE_URL } from '@/features/loja/api/httpClient'
 
 const router = useRouter()
 
@@ -26,6 +28,12 @@ function handleAuthenticated() {
       <p class="client-login-view__subtitle">Aceda para fazer encomendas e ver o seu estado.</p>
 
       <ClientLoginForm @success="handleAuthenticated" />
+
+      <footer class="client-login-view__footer">
+        <span class="client-login-view__footer-item">
+          <Globe :size="16" /> A ligar a: {{ API_BASE_URL }}
+        </span>
+      </footer>
     </main>
   </div>
 </template>
@@ -59,6 +67,19 @@ function handleAuthenticated() {
   margin: 0 0 28px;
   font-size: 14px;
   color: var(--color-body);
+}
+
+.client-login-view__footer {
+  position: absolute;
+  bottom: 28px;
+}
+
+.client-login-view__footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-muted);
 }
 
 @media (max-width: 900px) {

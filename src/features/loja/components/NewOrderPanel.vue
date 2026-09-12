@@ -1,31 +1,52 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { AlertTriangle, CheckCircle2, Plus, Send, Trash2 } from '@lucide/vue'
 import { formatMoney } from '@/features/orders/utils/orders'
-import type { CatalogItem } from '../data/catalog'
-import type { ClientCartItem, RequestFeedback } from '../types/client.types'
+import type { CatalogProduct, ClientCartItem, Customer, RequestFeedback } from '../types/client.types'
 
 const props = defineProps<{
-  catalog: CatalogItem[]
+  customers: Customer[]
+  catalog: CatalogProduct[]
   cart: ClientCartItem[]
   cartTotal: number
+  isLoadingOptions: boolean
   isSubmitting: boolean
   lastOrderFeedback: RequestFeedback | null
 }>()
 
 const emit = defineEmits<{
-  addToCart: [sku: string, quantity: number]
-  removeFromCart: [sku: string]
+  addToCart: [productId: number, quantity: number]
+  removeFromCart: [productId: number]
   submit: []
 }>()
 
-const selectedSku = ref(props.catalog[0]?.sku ?? '')
+const selectedCustomerId = defineModel<number | null>('selectedCustomerId', { required: true })
+
+const selectedProductId = ref<number | null>(props.catalog[0]?.id ?? null)
 const quantity = ref(1)
 
+// O catálogo chega de forma assíncrona (pedido à API); assim que estiver
+// disponível, selecciona o primeiro produto por defeito.
+watch(
+  () => props.catalog,
+  (list) => {
+    if (selectedProductId.value === null && list.length > 0) {
+      selectedProductId.value = list[0]!.id
+    }
+  },
+  { immediate: true },
+)
+
 function handleAdd() {
-  if (!selectedSku.value || quantity.value < 1) return
-  emit('addToCart', selectedSku.value, quantity.value)
+  if (!selectedProductId.value || quantity.value < 1) return
+  emit('addToCart', selectedProductId.value, quantity.value)
   quantity.value = 1
+}
+
+function stockLabel(product: CatalogProduct): string {
+  if (product.stock_status === 'out_of_stock') return 'esgotado'
+  if (product.stock_status === 'low_stock') return `${product.stock} em stock (baixo)`
+  return `${product.stock} em stock`
 }
 </script>
 
@@ -33,12 +54,22 @@ function handleAdd() {
   <section class="order-panel">
     <h2 class="order-panel__title">Nova Encomenda</h2>
 
+    <label class="field">
+      <span class="field__label">Cliente</span>
+      <select v-model="selectedCustomerId" class="select" :disabled="isLoadingOptions">
+        <option :value="null" disabled>Seleccione um cliente</option>
+        <option v-for="customer in customers" :key="customer.id" :value="customer.id">
+          {{ customer.name }}
+        </option>
+      </select>
+    </label>
+
     <div class="order-panel__picker">
       <label class="field field--product">
         <span class="field__label">Produto</span>
-        <select v-model="selectedSku" class="select">
-          <option v-for="item in catalog" :key="item.sku" :value="item.sku">
-            {{ item.name }} — {{ formatMoney(item.unitPrice) }}
+        <select v-model="selectedProductId" class="select" :disabled="isLoadingOptions">
+          <option v-for="item in catalog" :key="item.id" :value="item.id">
+            {{ item.name }} — {{ formatMoney(Number(item.price)) }} ({{ stockLabel(item) }})
           </option>
         </select>
       </label>
@@ -54,7 +85,7 @@ function handleAdd() {
     </div>
 
     <ul v-if="cart.length" class="cart-list">
-      <li v-for="item in cart" :key="item.sku" class="cart-list__item">
+      <li v-for="item in cart" :key="item.productId" class="cart-list__item">
         <span class="cart-list__name">{{ item.name }}</span>
         <span class="cart-list__qty">x{{ item.quantity }}</span>
         <span class="cart-list__price">{{ formatMoney(item.unitPrice * item.quantity) }}</span>
@@ -62,7 +93,7 @@ function handleAdd() {
           class="cart-list__remove"
           type="button"
           aria-label="Remover"
-          @click="emit('removeFromCart', item.sku)"
+          @click="emit('removeFromCart', item.productId)"
         >
           <Trash2 :size="14" />
         </button>
@@ -77,7 +108,7 @@ function handleAdd() {
       <button
         class="btn"
         type="button"
-        :disabled="!cart.length || isSubmitting"
+        :disabled="!cart.length || !selectedCustomerId || isSubmitting"
         @click="emit('submit')"
       >
         <Send :size="16" /> {{ isSubmitting ? 'A enviar...' : 'Enviar Encomenda' }}
@@ -120,6 +151,11 @@ function handleAdd() {
 
 .field {
   display: block;
+  margin-bottom: 16px;
+}
+
+.order-panel__picker .field {
+  margin-bottom: 0;
 }
 
 .field--product {

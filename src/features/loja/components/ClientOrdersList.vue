@@ -2,7 +2,7 @@
 import { PackageSearch, RefreshCw } from '@lucide/vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import { formatMoney } from '@/features/orders/utils/orders'
-import { orderStatusMeta } from '../utils/clientOrders'
+import { orderStatusVariant } from '../utils/clientOrders'
 import type { ClientOrder } from '../types/client.types'
 
 defineProps<{
@@ -37,11 +37,13 @@ function formatDate(value: string): string {
       <li v-for="order in orders" :key="order.id" class="orders-list__item">
         <div class="orders-list__main">
           <span class="orders-list__number">#{{ order.number }}</span>
-          <span class="orders-list__date">{{ formatDate(order.createdAt) }}</span>
+          <span class="orders-list__meta">
+            {{ order.customer?.name }} · {{ formatDate(order.placed_at) }}
+          </span>
         </div>
-        <span class="orders-list__total">{{ formatMoney(order.total) }}</span>
-        <StatusBadge :variant="orderStatusMeta(order.status).variant">
-          {{ orderStatusMeta(order.status).label }}
+        <span class="orders-list__total">{{ formatMoney(Number(order.total)) }}</span>
+        <StatusBadge :variant="orderStatusVariant(order.status)">
+          {{ order.status_label }}
         </StatusBadge>
       </li>
     </ul>
@@ -140,7 +142,7 @@ function formatDate(value: string): string {
   color: var(--color-ink);
 }
 
-.orders-list__date {
+.orders-list__meta {
   font-size: 12px;
   color: var(--color-muted);
 }

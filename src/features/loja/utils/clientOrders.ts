@@ -1,16 +1,15 @@
 import type { StatusBadgeVariant } from '@/features/orders/types/orders.types'
 
-// O backend real pode devolver estados diferentes dos deste mapa — qualquer
-// estado desconhecido cai no rótulo neutro em baixo, em vez de rebentar.
-const STATUS_META: Record<string, { label: string; variant: StatusBadgeVariant }> = {
-  pending: { label: 'Pendente', variant: 'neutral' },
-  confirmed: { label: 'Confirmada', variant: 'info' },
-  processing: { label: 'Em Processamento', variant: 'warning' },
-  shipped: { label: 'Enviada', variant: 'teal' },
-  delivered: { label: 'Entregue', variant: 'success' },
-  cancelled: { label: 'Cancelada', variant: 'danger' },
+// O rótulo já vem do backend (`status_label`); aqui só escolhemos a cor do
+// badge a partir da chave do estado. Um estado desconhecido cai no neutro.
+const STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  pending: 'neutral',
+  confirmed: 'info',
+  processing: 'warning',
+  shipped: 'teal',
+  delivered: 'success',
 }
 
-export function orderStatusMeta(status: string): { label: string; variant: StatusBadgeVariant } {
-  return STATUS_META[status.toLowerCase()] ?? { label: status, variant: 'neutral' }
+export function orderStatusVariant(status: string): StatusBadgeVariant {
+  return STATUS_VARIANT[status.toLowerCase()] ?? 'neutral'
 }

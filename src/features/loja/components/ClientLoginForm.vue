@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { AlertCircle, LogIn } from '@lucide/vue'
+import { loginRequest } from '../api/clientApi'
 import { useClientSession } from '../composables/useClientSession'
-
-// Versão só de design: aceita qualquer email/palavra-passe e simula um
-// pequeno atraso de rede, sem chamar nenhum backend.
-// TODO: quando tiveres a API, substitui o corpo de handleSubmit por um
-// pedido real de login (o resto do formulário não precisa de mudar).
 
 const emit = defineEmits<{ success: [] }>()
 
@@ -17,34 +13,21 @@ const password = ref('')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 
-function customerNameFromEmail(value: string): string {
-  const [handle] = value.split('@')
-  if (!handle) return 'Cliente'
-  return handle
-    .replace(/[._-]+/g, ' ')
-    .split(' ')
-    .filter(Boolean)
-    .map((part) => part[0]!.toUpperCase() + part.slice(1))
-    .join(' ')
-}
-
 async function handleSubmit() {
   if (!email.value || !password.value || isSubmitting.value) return
 
   isSubmitting.value = true
   errorMessage.value = ''
 
-  await new Promise((resolve) => setTimeout(resolve, 500))
+  const result = await loginRequest(email.value.trim(), password.value)
   isSubmitting.value = false
 
-  setSession({
-    token: 'demo-token',
-    customer: {
-      id: 'demo-customer',
-      name: customerNameFromEmail(email.value.trim()),
-      email: email.value.trim(),
-    },
-  })
+  if (!result.ok || !result.data) {
+    errorMessage.value = result.error ?? 'Não foi possível iniciar sessão.'
+    return
+  }
+
+  setSession({ token: result.data.token, user: result.data.user })
   emit('success')
 }
 </script>
@@ -59,7 +42,7 @@ async function handleSubmit() {
         type="email"
         required
         autocomplete="username"
-        placeholder="cliente@exemplo.com"
+        placeholder="demo@vp.mz"
       />
     </label>
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { LogOut, ShoppingBag } from '@lucide/vue'
 
-defineProps<{ customerName: string }>()
+defineProps<{ userName: string; companyName?: string | null }>()
 
 const emit = defineEmits<{ logout: [] }>()
 </script>
@@ -17,7 +17,10 @@ const emit = defineEmits<{ logout: [] }>()
     </div>
 
     <div class="portal-header__user">
-      <span class="portal-header__customer">{{ customerName }}</span>
+      <div class="portal-header__identity">
+        <span class="portal-header__user-name">{{ userName }}</span>
+        <span v-if="companyName" class="portal-header__company">{{ companyName }}</span>
+      </div>
       <button class="portal-header__logout" type="button" @click="emit('logout')">
         <LogOut :size="16" /> Sair
       </button>
@@ -72,10 +75,22 @@ const emit = defineEmits<{ logout: [] }>()
   gap: 14px;
 }
 
-.portal-header__customer {
+.portal-header__identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.portal-header__user-name {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-ink);
+}
+
+.portal-header__company {
+  font-size: 12px;
+  color: var(--color-muted);
 }
 
 .portal-header__logout {
@@ -103,7 +118,7 @@ const emit = defineEmits<{ logout: [] }>()
 }
 
 @media (max-width: 560px) {
-  .portal-header__customer {
+  .portal-header__identity {
     display: none;
   }
 }
