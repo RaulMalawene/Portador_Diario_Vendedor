@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { hasStoredClientSession } from '@/features/loja/composables/useClientSession'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,7 +58,31 @@ const router = createRouter({
       name: 'about',
       component: () => import('../views/AboutView.vue'),
     },
+    // Área do Cliente: telas separadas do sistema do fornecedor, usadas para
+    // testar pedidos reais ao backend (login, criar encomenda, ver estado),
+    // incluindo pedidos simultâneos abrindo várias abas.
+    {
+      path: '/loja/login',
+      name: 'loja-login',
+      component: () => import('../views/loja/ClientLoginView.vue'),
+      meta: { clientGuestOnly: true },
+    },
+    {
+      path: '/loja/encomendas',
+      name: 'loja-encomendas',
+      component: () => import('../views/loja/ClientOrdersView.vue'),
+      meta: { requiresClientAuth: true },
+    },
   ],
+})
+
+router.beforeEach((to) => {
+  if (to.meta.requiresClientAuth && !hasStoredClientSession()) {
+    return { name: 'loja-login' }
+  }
+  if (to.meta.clientGuestOnly && hasStoredClientSession()) {
+    return { name: 'loja-encomendas' }
+  }
 })
 
 export default router
