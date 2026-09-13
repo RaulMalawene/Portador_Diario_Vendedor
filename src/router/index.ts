@@ -72,14 +72,14 @@ const router = createRouter({
     // testar pedidos reais ao backend (login, criar encomenda, ver estado),
     // incluindo pedidos simultâneos abrindo várias abas.
     {
-      path: '/loja/login',
-      name: 'loja-login',
+      path: '/cliente/login',
+      name: 'cliente-login',
       component: () => import('../views/loja/ClientLoginView.vue'),
       meta: { clientGuestOnly: true },
     },
     {
-      path: '/loja/encomendas',
-      name: 'loja-encomendas',
+      path: '/cliente/encomendas',
+      name: 'cliente-encomendas',
       component: () => import('../views/loja/ClientOrdersView.vue'),
       meta: { requiresClientAuth: true },
     },
@@ -87,13 +87,13 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  // Área do Cliente (loja): sessão e guarda próprias, independentes do
-  // portal do fornecedor abaixo.
+  // Área do Cliente: sessão e guarda próprias, independentes do portal do
+  // fornecedor abaixo.
   if (to.meta.requiresClientAuth && !hasStoredClientSession()) {
-    return { name: 'loja-login' }
+    return { name: 'cliente-login' }
   }
   if (to.meta.clientGuestOnly && hasStoredClientSession()) {
-    return { name: 'loja-encomendas' }
+    return { name: 'cliente-encomendas' }
   }
 
   if (to.meta.requiresAuth || to.meta.guestOnly) {

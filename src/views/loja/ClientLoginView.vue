@@ -8,7 +8,7 @@ import { API_BASE_URL } from '@/services/apiClient'
 const router = useRouter()
 
 function handleAuthenticated() {
-  router.push('/loja/encomendas')
+  router.push('/cliente/encomendas')
 }
 </script>
 
