@@ -2,7 +2,8 @@ import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { STATUS_SEQUENCE } from '@/features/orders/utils/orders'
 import type { OrderStatus } from '@/features/orders/types/orders.types'
-import { fetchAllOrders, fetchCustomerCount, fetchProductCount } from '../api/dashboardApi'
+import { fetchAllOrders } from '@/features/orders/api/ordersApi'
+import { fetchCustomerCount, fetchProductCount } from '../api/dashboardApi'
 import type {
   DashboardOrder,
   OrderStatusSummary,
@@ -88,6 +89,7 @@ export function useDashboard() {
       id: order.id,
       number: order.number,
       status: order.status as OrderStatus,
+      statusLabel: order.status_label,
       total: order.total,
       placedAt: order.placed_at,
       customerName: order.customer?.name ?? '—',

@@ -2,7 +2,7 @@
 import { ChevronRight } from '@lucide/vue'
 import { RouterLink } from 'vue-router'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import { formatMoney, statusBadge, statusLabel } from '@/features/orders/utils/orders'
+import { formatMoney, statusBadge } from '@/features/orders/utils/orders'
 import type { DashboardOrder } from '../types/dashboard.types'
 
 defineProps<{ orders: DashboardOrder[] }>()
@@ -33,7 +33,7 @@ function formatDate(value: string): string {
           <span class="orders__date">{{ formatDate(order.placedAt) }}</span>
           <span class="orders__value">{{ formatMoney(Number(order.total)) }}</span>
           <span class="orders__status">
-            <StatusBadge :variant="statusBadge(order.status)">{{ statusLabel(order.status) }}</StatusBadge>
+            <StatusBadge :variant="statusBadge(order.status)">{{ order.statusLabel }}</StatusBadge>
           </span>
         </div>
       </li>

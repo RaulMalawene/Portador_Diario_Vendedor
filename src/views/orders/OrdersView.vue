@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { FileDown, ShoppingCart, Clock, PackageSearch, Wallet } from '@lucide/vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { AlertCircle, FileDown, ShoppingCart, Clock, PackageSearch, Wallet } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import PaginationBar from '@/components/ui/PaginationBar.vue'
 import OrdersToolbar from '@/features/orders/components/OrdersToolbar.vue'
@@ -12,22 +12,36 @@ import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const { orders, kpis } = useOrders()
+const { orders, isLoading, loadError, meta, kpis, load, loadKpis } = useOrders()
 
 const search = ref('')
 const statusFilter = ref('all')
 
-const filteredOrders = computed(() =>
-  orders.value.filter((order) => {
-    const query = search.value.trim().toLowerCase()
-    const matchesQuery =
-      !query ||
-      order.number.toLowerCase().includes(query) ||
-      order.customer.name.toLowerCase().includes(query)
-    const matchesStatus = statusFilter.value === 'all' || statusFilter.value === order.status
-    return matchesQuery && matchesStatus
-  }),
-)
+function currentFilters(page = 1) {
+  return {
+    search: search.value.trim() || undefined,
+    status: statusFilter.value === 'all' ? undefined : statusFilter.value,
+    page,
+  }
+}
+
+let searchDebounce: ReturnType<typeof setTimeout> | undefined
+
+watch([search, statusFilter], () => {
+  clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => load(currentFilters()), 300)
+})
+
+onBeforeUnmount(() => clearTimeout(searchDebounce))
+
+function goToPage(page: number) {
+  load(currentFilters(page))
+}
+
+onMounted(() => {
+  load(currentFilters())
+  loadKpis()
+})
 </script>
 
 <template>
@@ -55,7 +69,7 @@ const filteredOrders = computed(() =>
       <OrderKpiCard
         label="Total de Encomendas"
         :value="kpis.total"
-        note="no período actual"
+        note="no total"
         :icon="ShoppingCart"
       />
       <OrderKpiCard
@@ -82,13 +96,19 @@ const filteredOrders = computed(() =>
 
     <OrdersToolbar v-model:search="search" v-model:status="statusFilter" />
 
+    <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="isLoading" class="page-loading">A carregar encomendas...</p>
+
     <section class="card card--table">
-      <OrdersTable :orders="filteredOrders" />
+      <OrdersTable :orders="orders" />
 
       <PaginationBar
-        :shown="filteredOrders.length"
-        :total="orders.length"
+        :shown="orders.length"
+        :total="meta.total"
+        :current-page="meta.currentPage"
+        :last-page="meta.lastPage"
         items-label="encomendas"
+        @change="goToPage"
       />
     </section>
   </AppShell>
@@ -160,6 +180,24 @@ const filteredOrders = computed(() =>
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 22px;
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.page-loading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
 
 .card {

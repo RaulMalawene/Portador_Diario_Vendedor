@@ -1,64 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ArrowRight, CheckCircle2, XCircle } from '@lucide/vue'
+import { ArrowRight, CheckCircle2 } from '@lucide/vue'
 
-const props = defineProps<{
-  status: string
+defineProps<{
   nextLabel: string | null
-  cancellable: boolean
+  isAdvancing: boolean
 }>()
 
-const emit = defineEmits<{ advance: []; cancel: [] }>()
-
-const confirmingCancel = ref(false)
-let resetTimer: ReturnType<typeof setTimeout> | undefined
-
-function startCancel() {
-  confirmingCancel.value = true
-  clearTimeout(resetTimer)
-  resetTimer = setTimeout(() => (confirmingCancel.value = false), 5000)
-}
-
-function confirmCancel() {
-  clearTimeout(resetTimer)
-  confirmingCancel.value = false
-  emit('cancel')
-}
-
-function abortCancel() {
-  clearTimeout(resetTimer)
-  confirmingCancel.value = false
-}
+const emit = defineEmits<{ advance: [] }>()
 </script>
 
 <template>
   <div class="status-action">
-    <button v-if="props.nextLabel" class="btn" type="button" @click="emit('advance')">
-      <ArrowRight :size="16" /><span>Avançar para {{ props.nextLabel }}</span>
+    <button
+      v-if="nextLabel"
+      class="btn"
+      type="button"
+      :disabled="isAdvancing"
+      @click="emit('advance')"
+    >
+      <ArrowRight :size="16" /><span>{{ isAdvancing ? 'A avançar...' : `Avançar para ${nextLabel}` }}</span>
     </button>
-    <span v-else class="status-done" :class="{ 'is-cancelled': props.status === 'cancelled' }">
-      <CheckCircle2 v-if="props.status !== 'cancelled'" :size="16" />
-      <XCircle v-else :size="16" />
-      {{ props.status === 'cancelled' ? 'Encomenda cancelada' : 'Encomenda concluída' }}
+    <span v-else class="status-done">
+      <CheckCircle2 :size="16" />
+      Encomenda concluída
     </span>
-
-    <template v-if="props.cancellable">
-      <button
-        v-if="!confirmingCancel"
-        class="btn-text btn-text--danger"
-        type="button"
-        @click="startCancel"
-      >
-        Cancelar encomenda
-      </button>
-      <span v-else class="confirm-cancel">
-        Tem a certeza?
-        <button class="btn-text btn-text--danger" type="button" @click="confirmCancel">
-          Sim, cancelar
-        </button>
-        <button class="btn-text" type="button" @click="abortCancel">Voltar</button>
-      </span>
-    </template>
   </div>
 </template>
 
@@ -89,8 +54,13 @@ function abortCancel() {
   transition: background 0.15s;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
   background: var(--brand-primary-dark);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .status-done {
@@ -105,42 +75,5 @@ function abortCancel() {
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
-}
-
-.status-done.is-cancelled {
-  background: var(--color-danger-tint);
-  color: var(--color-danger);
-}
-
-.btn-text {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-muted);
-  cursor: pointer;
-}
-
-.btn-text:hover {
-  color: var(--color-ink);
-  text-decoration: underline;
-}
-
-.btn-text--danger {
-  color: var(--color-danger);
-}
-
-.btn-text--danger:hover {
-  color: var(--color-danger);
-}
-
-.confirm-cancel {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--color-body);
 }
 </style>

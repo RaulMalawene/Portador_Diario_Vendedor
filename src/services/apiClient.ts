@@ -15,6 +15,9 @@ export interface ApiResult<T> {
   status: number | null
   data: T | null
   error: string | null
+  /** Corpo bruto da resposta de erro, para quem precisar de mais do que a
+   * mensagem (ex.: os campos extra de InsufficientStockException). */
+  errorPayload: unknown
 }
 
 interface RequestOptions {
@@ -76,6 +79,7 @@ export async function apiRequest<T>(
           status: response.status,
           data: null,
           error: raw.slice(0, 200) || `Erro ${response.status}`,
+          errorPayload: null,
         }
       }
     }
@@ -86,12 +90,13 @@ export async function apiRequest<T>(
         status: response.status,
         data: null,
         error: extractErrorMessage(payload, `Erro ${response.status}`),
+        errorPayload: payload,
       }
     }
 
-    return { ok: true, status: response.status, data: payload as T, error: null }
+    return { ok: true, status: response.status, data: payload as T, error: null, errorPayload: null }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Falha de ligação ao servidor.'
-    return { ok: false, status: null, data: null, error: message }
+    return { ok: false, status: null, data: null, error: message, errorPayload: null }
   }
 }

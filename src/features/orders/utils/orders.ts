@@ -1,10 +1,4 @@
-import type {
-  Order,
-  OrderItem,
-  OrderStatus,
-  OrderStatusMeta,
-  StatusBadgeVariant,
-} from '../types/orders.types'
+import type { Order, OrderStatus, OrderStatusMeta, StatusBadgeVariant } from '../types/orders.types'
 
 export const STATUS_SEQUENCE: OrderStatus[] = [
   'pending',
@@ -14,13 +8,16 @@ export const STATUS_SEQUENCE: OrderStatus[] = [
   'delivered',
 ]
 
+// Rótulos alinhados exactamente com App\Enums\OrderStatus::label() no backend
+// — usados aqui só para a legenda genérica do stepper e o filtro da toolbar.
+// Para o estado de uma encomenda concreta, usa sempre `order.statusLabel`
+// (vem da API), nunca `statusLabel(order.status)`.
 export const STATUS_META: Record<OrderStatus, OrderStatusMeta> = {
   pending: { label: 'Pendente', badge: 'neutral' },
   confirmed: { label: 'Confirmada', badge: 'info' },
-  processing: { label: 'Em Processamento', badge: 'warning' },
+  processing: { label: 'Em processamento', badge: 'warning' },
   shipped: { label: 'Enviada', badge: 'teal' },
   delivered: { label: 'Entregue', badge: 'success' },
-  cancelled: { label: 'Cancelada', badge: 'danger' },
 }
 
 const BADGE_COLOR_VAR: Record<StatusBadgeVariant, string> = {
@@ -29,7 +26,6 @@ const BADGE_COLOR_VAR: Record<StatusBadgeVariant, string> = {
   warning: '--color-warning',
   teal: '--color-teal',
   success: '--color-success',
-  danger: '--color-danger',
 }
 
 export function statusLabel(status: OrderStatus): string {
@@ -44,20 +40,7 @@ export function statusColorVar(status: OrderStatus): string {
   return `var(${BADGE_COLOR_VAR[STATUS_META[status].badge]})`
 }
 
-export function nextStatus(status: OrderStatus): OrderStatus | null {
-  const index = STATUS_SEQUENCE.indexOf(status)
-  if (index === -1 || index === STATUS_SEQUENCE.length - 1) return null
-  return STATUS_SEQUENCE[index + 1] ?? null
-}
-
-export function canCancel(status: OrderStatus): boolean {
-  return status === 'pending' || status === 'confirmed'
-}
-
-export function orderTotal(items: OrderItem[]): number {
-  return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
-}
-
+/** Total de unidades pedidas (soma as quantidades de todas as linhas). */
 export function itemsCount(order: Order): number {
   return order.items.reduce((sum, item) => sum + item.quantity, 0)
 }

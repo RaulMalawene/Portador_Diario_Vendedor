@@ -1,50 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Mail, MapPin, Phone, Copy, Check } from '@lucide/vue'
+import { Mail, Phone } from '@lucide/vue'
 import type { OrderCustomer } from '../types/orders.types'
 import { customerInitials } from '../utils/orders'
 
-const props = defineProps<{ customer: OrderCustomer }>()
-
-const copied = ref(false)
-
-async function copyAddress() {
-  try {
-    await navigator.clipboard.writeText(props.customer.address)
-    copied.value = true
-    setTimeout(() => (copied.value = false), 1800)
-  } catch {
-    // clipboard unavailable — silently ignore
-  }
-}
+defineProps<{ customer: OrderCustomer }>()
 </script>
 
 <template>
   <div class="customer">
     <div class="customer__head">
       <span class="customer__avatar">{{ customerInitials(customer.name) }}</span>
-      <div>
-        <p class="customer__name">{{ customer.name }}</p>
-        <p class="customer__tag">Cliente B2B</p>
-      </div>
+      <p class="customer__name">{{ customer.name }}</p>
     </div>
 
     <ul class="customer__list">
-      <li>
+      <li v-if="customer.email">
         <Mail :size="15" />
         <a :href="`mailto:${customer.email}`">{{ customer.email }}</a>
       </li>
-      <li>
+      <li v-if="customer.phone">
         <Phone :size="15" />
         <a :href="`tel:${customer.phone}`">{{ customer.phone }}</a>
       </li>
-      <li>
-        <MapPin :size="15" />
-        <span>{{ customer.address }}</span>
-        <button class="copy-btn" type="button" aria-label="Copiar morada" @click="copyAddress">
-          <Check v-if="copied" :size="14" />
-          <Copy v-else :size="14" />
-        </button>
+      <li v-if="!customer.email && !customer.phone" class="customer__empty">
+        Sem contactos registados para este cliente.
       </li>
     </ul>
   </div>
@@ -83,12 +62,6 @@ async function copyAddress() {
   color: var(--color-ink);
 }
 
-.customer__tag {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--color-muted);
-}
-
 .customer__list {
   display: flex;
   flex-direction: column;
@@ -123,23 +96,7 @@ async function copyAddress() {
   text-decoration: underline;
 }
 
-.copy-btn {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  margin-left: auto;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
+.customer__empty {
   color: var(--color-muted);
-  cursor: pointer;
-}
-
-.copy-btn:hover {
-  background: var(--color-surface-soft);
-  color: var(--brand-primary);
 }
 </style>

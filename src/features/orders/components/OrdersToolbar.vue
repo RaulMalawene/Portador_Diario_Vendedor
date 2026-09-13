@@ -8,10 +8,9 @@ const statusOptions = [
   { value: 'all', label: 'Todos os Estados' },
   { value: 'pending', label: 'Pendente' },
   { value: 'confirmed', label: 'Confirmada' },
-  { value: 'processing', label: 'Em Processamento' },
+  { value: 'processing', label: 'Em processamento' },
   { value: 'shipped', label: 'Enviada' },
   { value: 'delivered', label: 'Entregue' },
-  { value: 'cancelled', label: 'Cancelada' },
 ]
 </script>
 

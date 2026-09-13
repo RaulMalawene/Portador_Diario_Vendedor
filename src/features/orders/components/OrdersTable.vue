@@ -4,7 +4,7 @@ import { ArrowUpDown, ChevronRight } from '@lucide/vue'
 import { ref, computed } from 'vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import type { Order } from '../types/orders.types'
-import { formatMoney, itemsCount, orderTotal, statusBadge, statusLabel } from '../utils/orders'
+import { formatMoney, statusBadge } from '../utils/orders'
 
 const props = defineProps<{ orders: Order[] }>()
 
@@ -23,6 +23,11 @@ function toggleSort() {
 
 function openOrder(order: Order) {
   router.push(`/encomendas/${order.id}`)
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('pt-PT')
 }
 </script>
 
@@ -66,13 +71,11 @@ function openOrder(order: Order) {
       >
         <td class="td-strong td-mono">{{ order.number }}</td>
         <td class="td-truncate">{{ order.customer.name }}</td>
-        <td class="td-muted td-mono">{{ order.placedAt.split(' às')[0] }}</td>
-        <td class="td-mono">{{ itemsCount(order) }}</td>
-        <td class="td-mono td-strong">{{ formatMoney(orderTotal(order.items)) }}</td>
+        <td class="td-muted td-mono">{{ formatDate(order.placedAt) }}</td>
+        <td class="td-mono">{{ order.itemsCount }}</td>
+        <td class="td-mono td-strong">{{ formatMoney(order.total) }}</td>
         <td>
-          <StatusBadge :variant="statusBadge(order.status)">{{
-            statusLabel(order.status)
-          }}</StatusBadge>
+          <StatusBadge :variant="statusBadge(order.status)">{{ order.statusLabel }}</StatusBadge>
         </td>
         <td class="ta-right">
           <span class="row-go"><ChevronRight :size="18" /></span>

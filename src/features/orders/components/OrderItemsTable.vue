@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { AlertTriangle } from '@lucide/vue'
 import type { OrderItem } from '../types/orders.types'
-import { formatMoney, orderTotal } from '../utils/orders'
+import { formatMoney } from '../utils/orders'
 
-const props = defineProps<{ items: OrderItem[] }>()
+const props = defineProps<{ items: OrderItem[]; total: number }>()
 
-function subtotal(item: OrderItem) {
-  return item.quantity * item.unitPrice
-}
-
-const total = computed(() => orderTotal(props.items))
+const total = computed(() => props.total)
 </script>
 
 <template>
@@ -25,21 +20,12 @@ const total = computed(() => orderTotal(props.items))
       </tr>
     </thead>
     <tbody>
-      <tr v-for="item in items" :key="item.sku">
-        <td class="td-mono td-muted">{{ item.sku }}</td>
-        <td class="td-strong">
-          {{ item.name }}
-          <span
-            v-if="item.quantity > item.available"
-            class="shortage"
-            :title="`Stock disponível: ${item.available}`"
-          >
-            <AlertTriangle :size="13" /> stock insuficiente
-          </span>
-        </td>
+      <tr v-for="item in items" :key="item.id">
+        <td class="td-mono td-muted">{{ item.sku ?? '—' }}</td>
+        <td class="td-strong">{{ item.name }}</td>
         <td class="td-mono">{{ item.quantity }}</td>
         <td class="td-mono td-muted">{{ formatMoney(item.unitPrice) }}</td>
-        <td class="td-mono td-strong">{{ formatMoney(subtotal(item)) }}</td>
+        <td class="td-mono td-strong">{{ formatMoney(item.subtotal) }}</td>
       </tr>
     </tbody>
   </table>
@@ -86,21 +72,6 @@ const total = computed(() => orderTotal(props.items))
 
 .td-muted {
   color: var(--color-body);
-}
-
-.shortage {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-danger-tint);
-  color: var(--color-danger);
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  vertical-align: middle;
 }
 
 .total-row {

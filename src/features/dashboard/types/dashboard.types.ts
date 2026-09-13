@@ -24,6 +24,7 @@ export interface DashboardOrder {
   id: number
   number: string
   status: OrderStatus
+  statusLabel: string
   total: string
   placedAt: string
   customerName: string

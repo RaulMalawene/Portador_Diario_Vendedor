@@ -1,7 +1,8 @@
-export type OrderStatus =
-  'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+// O backend não tem estado "cancelada" nem endpoint de cancelamento — só
+// permite avançar a sequência abaixo, um passo de cada vez.
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered'
 
-export type StatusBadgeVariant = 'neutral' | 'info' | 'warning' | 'teal' | 'success' | 'danger'
+export type StatusBadgeVariant = 'neutral' | 'info' | 'warning' | 'teal' | 'success'
 
 export interface OrderStatusMeta {
   label: string
@@ -9,42 +10,52 @@ export interface OrderStatusMeta {
 }
 
 export interface OrderItem {
-  sku: string
+  id: number
+  sku: string | null
   name: string
   quantity: number
   unitPrice: number
-  available: number
+  subtotal: number
 }
 
 export interface OrderCustomer {
+  id: number
   name: string
-  email: string
-  phone: string
-  address: string
+  email: string | null
+  phone: string | null
 }
 
 export interface OrderHistoryEntry {
+  from: OrderStatus | null
+  fromLabel: string | null
   to: OrderStatus
-  note: string
-  by: string
+  toLabel: string
+  note: string | null
   date: string
 }
 
 export interface Order {
-  id: string
+  id: number
   number: string
   status: OrderStatus
+  statusLabel: string
+  nextStatus: OrderStatus | null
+  nextStatusLabel: string | null
   placedAt: string
-  expectedAt: string
+  total: number
+  itemsCount: number
   customer: OrderCustomer
   items: OrderItem[]
   history: OrderHistoryEntry[]
 }
 
+/** Corpo de InsufficientStockException (422) ao tentar confirmar uma encomenda. */
 export interface StockConflict {
-  product: string
+  product: string | null
   available: number
   requested: number
 }
 
-export type AdvanceResult = { ok: true } | { ok: false; conflict: StockConflict }
+export type AdvanceResult =
+  | { ok: true; order: Order }
+  | { ok: false; error: string; conflict?: StockConflict }

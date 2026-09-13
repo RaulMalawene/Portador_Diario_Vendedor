@@ -1,16 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  ArrowLeft,
-  AlertTriangle,
-  CalendarClock,
-  CheckCircle2,
-  Copy,
-  Check,
-  PackageX,
-  X,
-} from '@lucide/vue'
+import { ArrowLeft, AlertTriangle, CheckCircle2, Copy, Check, PackageX, X } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import OrderStatusStepper from '@/features/orders/components/OrderStatusStepper.vue'
@@ -19,39 +10,25 @@ import OrderCustomerCard from '@/features/orders/components/OrderCustomerCard.vu
 import OrderItemsTable from '@/features/orders/components/OrderItemsTable.vue'
 import OrderTimeline from '@/features/orders/components/OrderTimeline.vue'
 import { useOrders } from '@/features/orders/composables/useOrders'
-import type { StockConflict } from '@/features/orders/types/orders.types'
-import {
-  formatMoney,
-  itemsCount,
-  nextStatus,
-  orderTotal,
-  statusBadge,
-  statusLabel,
-} from '@/features/orders/utils/orders'
+import type { Order, StockConflict } from '@/features/orders/types/orders.types'
+import { formatMoney, statusBadge } from '@/features/orders/utils/orders'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
-const { findById, advance, cancel } = useOrders()
+const { fetchOrder, advance } = useOrders()
 
-const order = computed(() => findById(String(route.params.id)))
+const order = ref<Order | null>(null)
+const isLoading = ref(true)
+const notFound = ref(false)
+const isAdvancing = ref(false)
 
 const stockConflict = ref<StockConflict | null>(null)
+const errorMessage = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 let successTimer: ReturnType<typeof setTimeout> | undefined
-
-const nextLabel = computed(() => {
-  if (!order.value) return null
-  const next = nextStatus(order.value.status)
-  return next ? statusLabel(next) : null
-})
-
-const cancellable = computed(() => {
-  if (!order.value) return false
-  return order.value.status === 'pending' || order.value.status === 'confirmed'
-})
 
 function flashSuccess(message: string) {
   successMessage.value = message
@@ -59,22 +36,44 @@ function flashSuccess(message: string) {
   successTimer = setTimeout(() => (successMessage.value = null), 3200)
 }
 
-function handleAdvance() {
-  if (!order.value) return
-  stockConflict.value = null
-  const result = advance(order.value.id)
-  if (result.ok) {
-    flashSuccess(`Estado atualizado para "${statusLabel(order.value.status)}".`)
-  } else if (result.conflict.product) {
-    stockConflict.value = result.conflict
+async function loadOrder() {
+  const id = Number(route.params.id)
+  if (!Number.isFinite(id)) {
+    notFound.value = true
+    isLoading.value = false
+    return
   }
+
+  isLoading.value = true
+  const result = await fetchOrder(id)
+  isLoading.value = false
+
+  if (!result) {
+    notFound.value = true
+    return
+  }
+  order.value = result
 }
 
-function handleCancel() {
+async function handleAdvance() {
   if (!order.value) return
-  if (cancel(order.value.id)) {
-    stockConflict.value = null
-    flashSuccess('A encomenda foi cancelada.')
+
+  stockConflict.value = null
+  errorMessage.value = null
+  isAdvancing.value = true
+  const result = await advance(order.value)
+  isAdvancing.value = false
+
+  if (result.ok) {
+    order.value = result.order
+    flashSuccess(`Estado atualizado para "${result.order.statusLabel}".`)
+    return
+  }
+
+  if (result.conflict) {
+    stockConflict.value = result.conflict
+  } else {
+    errorMessage.value = result.error
   }
 }
 
@@ -93,6 +92,10 @@ async function copyNumber() {
 function goBack() {
   router.push('/encomendas')
 }
+
+onMounted(() => {
+  loadOrder()
+})
 </script>
 
 <template>
@@ -120,28 +123,25 @@ function goBack() {
               <Check v-if="copied" :size="14" />
               <Copy v-else :size="14" />
             </button>
-            <StatusBadge :variant="statusBadge(order.status)">{{
-              statusLabel(order.status)
-            }}</StatusBadge>
+            <StatusBadge :variant="statusBadge(order.status)">{{ order.statusLabel }}</StatusBadge>
           </div>
           <p class="hero__sub">
-            Encomenda realizada em {{ order.placedAt }} · Cliente: {{ order.customer.name }}
+            Encomenda realizada em {{ new Date(order.placedAt).toLocaleString('pt-PT') }} ·
+            Cliente: {{ order.customer.name }}
           </p>
         </div>
 
         <OrderStatusMenu
-          :status="order.status"
-          :next-label="nextLabel"
-          :cancellable="cancellable"
+          :next-label="order.nextStatusLabel"
+          :is-advancing="isAdvancing"
           @advance="handleAdvance"
-          @cancel="handleCancel"
         />
       </section>
 
       <div class="stat-strip">
         <div class="stat-chip">
-          <span class="stat-chip__label">Itens</span>
-          <span class="stat-chip__value">{{ itemsCount(order) }}</span>
+          <span class="stat-chip__label">Unidades</span>
+          <span class="stat-chip__value">{{ order.itemsCount }}</span>
         </div>
         <div class="stat-chip">
           <span class="stat-chip__label">Referências</span>
@@ -149,11 +149,7 @@ function goBack() {
         </div>
         <div class="stat-chip">
           <span class="stat-chip__label">Valor Total</span>
-          <span class="stat-chip__value">{{ formatMoney(orderTotal(order.items)) }}</span>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-chip__label"><CalendarClock :size="13" /> Entrega Prevista</span>
-          <span class="stat-chip__value">{{ order.expectedAt }}</span>
+          <span class="stat-chip__value">{{ formatMoney(order.total) }}</span>
         </div>
       </div>
 
@@ -169,7 +165,7 @@ function goBack() {
           <AlertTriangle :size="20" />
           <div class="flash__body">
             <strong>Não foi possível avançar: stock insuficiente</strong>
-            <p>
+            <p v-if="stockConflict.product">
               {{ stockConflict.product }} — disponível: {{ stockConflict.available }}, pedido:
               {{ stockConflict.requested }}.
             </p>
@@ -185,12 +181,25 @@ function goBack() {
         </div>
       </transition>
 
-      <section class="card">
-        <OrderStatusStepper v-if="order.status !== 'cancelled'" :status="order.status" />
-        <div v-else class="cancelled-notice">
-          <PackageX :size="20" />
-          <span>Esta encomenda foi cancelada e não avançará no fluxo de estados.</span>
+      <transition name="fade">
+        <div v-if="errorMessage" class="flash flash--danger">
+          <AlertTriangle :size="20" />
+          <div class="flash__body">
+            <strong>{{ errorMessage }}</strong>
+          </div>
+          <button
+            class="flash__close"
+            type="button"
+            aria-label="Dispensar aviso"
+            @click="errorMessage = null"
+          >
+            <X :size="16" />
+          </button>
         </div>
+      </transition>
+
+      <section class="card">
+        <OrderStatusStepper :status="order.status" />
       </section>
 
       <div class="grid">
@@ -210,7 +219,7 @@ function goBack() {
               </div>
               <span class="pill">{{ order.items.length }} referências</span>
             </div>
-            <OrderItemsTable :items="order.items" />
+            <OrderItemsTable :items="order.items" :total="order.total" />
           </section>
 
           <section class="card">
@@ -222,7 +231,7 @@ function goBack() {
       </div>
     </template>
 
-    <template v-else>
+    <template v-else-if="!isLoading">
       <div class="not-found">
         <PackageX :size="32" />
         <h1>Encomenda não encontrada</h1>
@@ -232,6 +241,8 @@ function goBack() {
         </button>
       </div>
     </template>
+
+    <p v-else class="page-loading">A carregar encomenda...</p>
   </AppShell>
 </template>
 
@@ -252,6 +263,13 @@ function goBack() {
 
 .back:hover {
   color: var(--brand-primary);
+}
+
+.page-loading {
+  margin: 24px 0 0;
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: center;
 }
 
 .hero {
@@ -314,18 +332,6 @@ function goBack() {
   background: rgba(255, 255, 255, 0.9);
 }
 
-.hero :deep(.status-action .btn-text) {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.hero :deep(.status-action .btn-text--danger) {
-  color: #ffd9d3;
-}
-
-.hero :deep(.status-action .confirm-cancel) {
-  color: rgba(255, 255, 255, 0.85);
-}
-
 .hero :deep(.status-done) {
   background: rgba(255, 255, 255, 0.16);
   color: var(--color-surface);
@@ -333,7 +339,7 @@ function goBack() {
 
 .stat-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 16px;
 }
@@ -459,15 +465,6 @@ function goBack() {
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--color-body);
-}
-
-.cancelled-notice {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-danger);
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .pill {
