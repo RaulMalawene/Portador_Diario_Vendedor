@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ChevronDown } from '@lucide/vue'
+import { AlertCircle, ChevronDown } from '@lucide/vue'
 import AppModal from '@/components/ui/AppModal.vue'
-import { categories } from '../data/products.mock'
-import type { ProductFormState } from '../types/products.types'
+import type { ProductCategoryOption, ProductFormState } from '../types/products.types'
 
 defineProps<{
   isEditing: boolean
+  categoryOptions: ProductCategoryOption[]
+  errorMessage?: string | null
 }>()
 
 const isOpen = defineModel<boolean>({ required: true })
@@ -25,6 +26,10 @@ function close() {
     </h2>
 
     <form class="product-modal__body" novalidate @submit.prevent="emit('submit')">
+      <p v-if="errorMessage" class="product-modal__error">
+        <AlertCircle :size="15" /> {{ errorMessage }}
+      </p>
+
       <label class="field">
         <span class="field__label">Nome do Produto</span>
         <input
@@ -52,10 +57,10 @@ function close() {
         <label class="field">
           <span class="field__label">Categoria</span>
           <div class="select select--full">
-            <select v-model="form.category" required>
-              <option value="" disabled>Seleccione</option>
-              <option v-for="category in categories" :key="category" :value="category">
-                {{ category }}
+            <select v-model="form.categoryId">
+              <option :value="null">Sem categoria</option>
+              <option v-for="category in categoryOptions" :key="category.id" :value="category.id">
+                {{ category.name }}
               </option>
             </select>
             <ChevronDown :size="16" class="select__icon" />
@@ -122,6 +127,18 @@ function close() {
   font-size: 18px;
   font-weight: 700;
   color: var(--color-ink);
+}
+
+.product-modal__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
 }
 
 .field {

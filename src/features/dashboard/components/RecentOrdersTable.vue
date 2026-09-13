@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { ChevronRight } from '@lucide/vue'
+import { RouterLink } from 'vue-router'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
-import type { Order } from '../types/dashboard.types'
-import { badgeVariant } from '../utils/orders'
+import { formatMoney, statusBadge, statusLabel } from '@/features/orders/utils/orders'
+import type { DashboardOrder } from '../types/dashboard.types'
 
-defineProps<{ orders: Order[] }>()
+defineProps<{ orders: DashboardOrder[] }>()
+
+function formatDate(value: string): string {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('pt-PT')
+}
 </script>
 
 <template>
@@ -14,24 +20,25 @@ defineProps<{ orders: Order[] }>()
         <h2 class="orders__title">Encomendas Recentes</h2>
         <p class="orders__sub">As últimas {{ orders.length }} transações realizadas no portal.</p>
       </div>
-      <a class="orders__link" href="#">Ver todas <ChevronRight :size="16" /></a>
+      <RouterLink class="orders__link" to="/encomendas">Ver todas <ChevronRight :size="16" /></RouterLink>
     </div>
 
-    <ul class="orders__list">
+    <ul v-if="orders.length" class="orders__list">
       <li v-for="order in orders" :key="order.id" class="orders__row">
         <div class="orders__row-main">
-          <span class="orders__id">{{ order.id }}</span>
-          <span class="orders__client">{{ order.cliente }}</span>
+          <span class="orders__id">{{ order.number }}</span>
+          <span class="orders__client">{{ order.customerName }}</span>
         </div>
         <div class="orders__row-meta">
-          <span class="orders__date">{{ order.data }}</span>
-          <span class="orders__value">{{ order.valor }}</span>
+          <span class="orders__date">{{ formatDate(order.placedAt) }}</span>
+          <span class="orders__value">{{ formatMoney(Number(order.total)) }}</span>
           <span class="orders__status">
-            <StatusBadge :variant="badgeVariant(order.estado)">{{ order.estado }}</StatusBadge>
+            <StatusBadge :variant="statusBadge(order.status)">{{ statusLabel(order.status) }}</StatusBadge>
           </span>
         </div>
       </li>
     </ul>
+    <p v-else class="orders__empty">Ainda não tem encomendas registadas.</p>
   </div>
 </template>
 
@@ -68,6 +75,14 @@ defineProps<{ orders: Order[] }>()
   color: var(--brand-primary);
   text-decoration: none;
   white-space: nowrap;
+}
+
+.orders__empty {
+  margin: 0;
+  padding: 24px 0;
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: center;
 }
 
 .orders__list {

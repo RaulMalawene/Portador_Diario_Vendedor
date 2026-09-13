@@ -36,8 +36,8 @@ function handle(action: () => void) {
         <Pencil :size="15" /> Editar
       </button>
       <button type="button" @click="handle(() => emit('toggleActive'))">
-        <component :is="product.active ? PowerOff : Power" :size="15" />
-        {{ product.active ? 'Desactivar' : 'Activar' }}
+        <component :is="product.is_active ? PowerOff : Power" :size="15" />
+        {{ product.is_active ? 'Desactivar' : 'Activar' }}
       </button>
       <button type="button" class="row-menu__danger" @click="handle(() => emit('remove'))">
         <Trash2 :size="15" /> Eliminar

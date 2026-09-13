@@ -1,16 +1,35 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     shown: number
     total: number
     itemsLabel?: string
+    currentPage?: number
+    lastPage?: number
   }>(),
   {
     itemsLabel: 'resultados',
+    currentPage: 1,
+    lastPage: 1,
   },
 )
+
+const emit = defineEmits<{ change: [page: number] }>()
+
+// Janela de até 5 números de página à volta da página actual.
+const pages = computed(() => {
+  const start = Math.max(1, Math.min(props.currentPage - 2, props.lastPage - 4))
+  const end = Math.min(props.lastPage, Math.max(props.currentPage + 2, 5))
+  return Array.from({ length: Math.max(end - start + 1, 0) }, (_, i) => start + i)
+})
+
+function go(page: number) {
+  if (page < 1 || page > props.lastPage || page === props.currentPage) return
+  emit('change', page)
+}
 </script>
 
 <template>
@@ -18,14 +37,33 @@ withDefaults(
     <span class="pagination__info">
       A mostrar <strong>{{ shown }}</strong> de <strong>{{ total }}</strong> {{ itemsLabel }}
     </span>
-    <div class="pagination__pages">
-      <button class="page-btn" type="button" aria-label="Página anterior">
+    <div v-if="lastPage > 1" class="pagination__pages">
+      <button
+        class="page-btn"
+        type="button"
+        aria-label="Página anterior"
+        :disabled="currentPage === 1"
+        @click="go(currentPage - 1)"
+      >
         <ChevronLeft :size="16" />
       </button>
-      <button class="page-btn is-active" type="button">1</button>
-      <button class="page-btn" type="button">2</button>
-      <button class="page-btn" type="button">3</button>
-      <button class="page-btn" type="button" aria-label="Página seguinte">
+      <button
+        v-for="page in pages"
+        :key="page"
+        class="page-btn"
+        :class="{ 'is-active': page === currentPage }"
+        type="button"
+        @click="go(page)"
+      >
+        {{ page }}
+      </button>
+      <button
+        class="page-btn"
+        type="button"
+        aria-label="Página seguinte"
+        :disabled="currentPage === lastPage"
+        @click="go(currentPage + 1)"
+      >
         <ChevronRight :size="16" />
       </button>
     </div>
@@ -66,8 +104,13 @@ withDefaults(
   cursor: pointer;
 }
 
-.page-btn:hover {
+.page-btn:hover:not(:disabled) {
   background: var(--color-surface-soft);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .page-btn.is-active {

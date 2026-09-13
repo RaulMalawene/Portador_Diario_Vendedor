@@ -6,11 +6,10 @@ const status = defineModel<string>('status', { default: 'all' })
 
 const statusOptions = [
   { value: 'all', label: 'Todos os Estados' },
-  { value: 'Em Stock', label: 'Em stock' },
-  { value: 'Pendente', label: 'Stock baixo' },
-  { value: 'Esgotado', label: 'Esgotado' },
   { value: 'active', label: 'Activo' },
   { value: 'inactive', label: 'Inactivo' },
+  { value: 'low_stock', label: 'Stock Baixo' },
+  { value: 'out_of_stock', label: 'Esgotado' },
 ]
 </script>
 

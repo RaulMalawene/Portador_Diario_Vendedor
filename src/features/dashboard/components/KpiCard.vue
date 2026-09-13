@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { TrendingUp, TrendingDown } from '@lucide/vue'
 import type { KpiMetric } from '../types/dashboard.types'
 
 defineProps<{ metric: KpiMetric }>()
@@ -12,11 +11,7 @@ defineProps<{ metric: KpiMetric }>()
       <component :is="metric.icon" class="kpi__icon" :size="20" />
     </div>
     <div class="kpi__value">{{ metric.value }}</div>
-    <div class="kpi__trend" :class="metric.trend === 'up' ? 'is-up' : 'is-down'">
-      <component :is="metric.trend === 'up' ? TrendingUp : TrendingDown" :size="14" />
-      <span class="kpi__delta">{{ metric.delta }}</span>
-      <span class="kpi__note">{{ metric.note }}</span>
-    </div>
+    <p v-if="metric.hint" class="kpi__hint">{{ metric.hint }}</p>
   </article>
 </template>
 
@@ -52,26 +47,9 @@ defineProps<{ metric: KpiMetric }>()
   color: var(--color-ink);
 }
 
-.kpi__trend {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 10px;
+.kpi__hint {
+  margin: 10px 0 0;
   font-size: 12px;
-  font-weight: 600;
-}
-
-.kpi__trend.is-up {
-  color: var(--color-success);
-}
-
-.kpi__trend.is-down {
-  color: var(--color-danger);
-}
-
-.kpi__note {
-  margin-left: 2px;
-  font-weight: 400;
   color: var(--color-muted);
 }
 </style>

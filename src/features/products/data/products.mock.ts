@@ -1,11 +1,23 @@
 import { categoryNames } from '@/features/categories/data/categoryNames'
-import type { Product } from '../types/products.types'
+
+// Dados de demonstração usados apenas pelo ecrã de Categorias (ainda por
+// ligar à API) para contar produtos por categoria — independentes do
+// formato real de Product (já ligado ao backend em src/features/products).
+interface MockProduct {
+  name: string
+  sku: string
+  categoria: string
+  preco: string
+  stock: number
+  estado: 'Em Stock' | 'Esgotado' | 'Pendente'
+  active: boolean
+}
 
 // Reutiliza a mesma lista de nomes usada no ecrã de Categorias, para que
 // os dois ecrãs fiquem sempre em concordância.
 export const categories: string[] = [...categoryNames]
 
-export const products: Product[] = [
+export const products: MockProduct[] = [
   {
     name: 'Farinha de Milho Especial 1kg',
     sku: 'MZ-FL-001',

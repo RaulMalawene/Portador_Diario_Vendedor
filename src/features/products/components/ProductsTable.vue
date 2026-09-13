@@ -4,14 +4,15 @@ import { ArrowUpDown } from '@lucide/vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import ProductRowMenu from './ProductRowMenu.vue'
 import type { Product } from '../types/products.types'
+import { formatMoney } from '@/features/orders/utils/orders'
 import { productBadgeLabel, productBadgeVariant } from '../utils/products'
 
 const props = defineProps<{ products: Product[] }>()
 
 const emit = defineEmits<{
   edit: [Product]
-  toggleActive: [string]
-  remove: [string]
+  toggleActive: [Product]
+  remove: [number]
 }>()
 
 const sortAscending = ref(true)
@@ -59,13 +60,13 @@ function toggleSort() {
       </tr>
       <tr
         v-for="product in sortedProducts"
-        :key="product.sku"
-        :class="{ 'is-inactive': !product.active }"
+        :key="product.id"
+        :class="{ 'is-inactive': !product.is_active }"
       >
         <td class="td-strong td-truncate">{{ product.name }}</td>
         <td class="td-mono td-truncate">{{ product.sku }}</td>
-        <td class="td-muted td-truncate">{{ product.categoria }}</td>
-        <td class="td-mono">{{ product.preco }} MT</td>
+        <td class="td-muted td-truncate">{{ product.category?.name ?? 'Sem categoria' }}</td>
+        <td class="td-mono">{{ formatMoney(Number(product.price)) }}</td>
         <td class="td-mono" :class="{ 'td-zero': product.stock === 0 }">
           {{ product.stock }}
         </td>
@@ -78,8 +79,8 @@ function toggleSort() {
           <ProductRowMenu
             :product="product"
             @edit="emit('edit', product)"
-            @toggle-active="emit('toggleActive', product.sku)"
-            @remove="emit('remove', product.sku)"
+            @toggle-active="emit('toggleActive', product)"
+            @remove="emit('remove', product.id)"
           />
         </td>
       </tr>

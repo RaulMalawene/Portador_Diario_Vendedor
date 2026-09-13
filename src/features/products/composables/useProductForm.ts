@@ -4,7 +4,7 @@ import type { Product, ProductFormState } from '../types/products.types'
 const EMPTY_FORM: ProductFormState = {
   name: '',
   sku: '',
-  category: '',
+  categoryId: null,
   price: '',
   stock: '',
   isActive: true,
@@ -13,26 +13,29 @@ const EMPTY_FORM: ProductFormState = {
 export function useProductForm() {
   const isOpen = ref(false)
   const isEditing = ref(false)
-  const editingSku = ref<string | null>(null)
+  const editingId = ref<number | null>(null)
   const form = reactive<ProductFormState>({ ...EMPTY_FORM })
+  const formError = ref<string | null>(null)
 
   function openCreate() {
     isEditing.value = false
-    editingSku.value = null
+    editingId.value = null
+    formError.value = null
     Object.assign(form, EMPTY_FORM)
     isOpen.value = true
   }
 
   function openEdit(product: Product) {
     isEditing.value = true
-    editingSku.value = product.sku
+    editingId.value = product.id
+    formError.value = null
     Object.assign(form, {
       name: product.name,
       sku: product.sku,
-      category: product.categoria,
-      price: product.preco.replace(',', '.'),
+      categoryId: product.category?.id ?? null,
+      price: product.price,
       stock: String(product.stock),
-      isActive: product.active,
+      isActive: product.is_active,
     })
     isOpen.value = true
   }
@@ -41,5 +44,5 @@ export function useProductForm() {
     isOpen.value = false
   }
 
-  return { isOpen, isEditing, editingSku, form, openCreate, openEdit, close }
+  return { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, close }
 }

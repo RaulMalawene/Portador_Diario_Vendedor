@@ -1,25 +1,35 @@
 import type { Component } from 'vue'
-
-export type OrderStatus = 'Pendente' | 'Processando' | 'Enviado' | 'Entregue'
-
-export interface Order {
-  id: string
-  cliente: string
-  data: string
-  valor: string
-  estado: OrderStatus
-}
+import type { OrderStatus } from '@/features/orders/types/orders.types'
 
 export interface KpiMetric {
   label: string
   value: string
   icon: Component
-  trend: 'up' | 'down'
-  delta: string
-  note: string
+  hint?: string
 }
 
 export interface SalesPoint {
   label: string
   value: number
+}
+
+export interface OrderStatusSummary {
+  status: OrderStatus
+  count: number
+  percentage: number
+}
+
+/** Encomenda tal como vem da API (subconjunto do OrderResource do backend). */
+export interface DashboardOrder {
+  id: number
+  number: string
+  status: OrderStatus
+  total: string
+  placedAt: string
+  customerName: string
+}
+
+export interface StockAlerts {
+  lowStock: number
+  outOfStock: number
 }

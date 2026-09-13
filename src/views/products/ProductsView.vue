@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { FileDown, FileSpreadsheet, Plus } from '@lucide/vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { AlertCircle, FileDown, FileSpreadsheet, Plus } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import ProductsToolbar from '@/features/products/components/ProductsToolbar.vue'
 import ProductsTable from '@/features/products/components/ProductsTable.vue'
@@ -8,43 +8,80 @@ import PaginationBar from '@/components/ui/PaginationBar.vue'
 import ProductFormModal from '@/features/products/components/ProductFormModal.vue'
 import { useProducts } from '@/features/products/composables/useProducts'
 import { useProductForm } from '@/features/products/composables/useProductForm'
-import type { Product } from '@/features/products/types/products.types'
+import type { Product, ProductStatusFilter } from '@/features/products/types/products.types'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const { products, upsert, remove, toggleActive } = useProducts()
-const { isOpen, isEditing, editingSku, form, openCreate, openEdit, close } = useProductForm()
+const {
+  products,
+  categoryOptions,
+  isLoading,
+  loadError,
+  meta,
+  load,
+  loadCategoryOptions,
+  upsert,
+  remove,
+  toggleActive,
+} = useProducts()
+const { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, close } =
+  useProductForm()
 
 const search = ref('')
-const statusFilter = ref('all')
+const statusFilter = ref<ProductStatusFilter>('all')
 
-const filteredProducts = computed(() =>
-  products.value.filter((product) => {
-    const query = search.value.trim().toLowerCase()
-    const matchesQuery =
-      !query ||
-      product.name.toLowerCase().includes(query) ||
-      product.sku.toLowerCase().includes(query)
+function currentFilters(page = 1) {
+  return {
+    search: search.value.trim() || undefined,
+    status: statusFilter.value === 'all' ? undefined : statusFilter.value,
+    page,
+  }
+}
 
-    const matchesStatus =
-      statusFilter.value === 'all' ||
-      (statusFilter.value === 'active' && product.active) ||
-      (statusFilter.value === 'inactive' && !product.active) ||
-      product.estado === statusFilter.value
+let searchDebounce: ReturnType<typeof setTimeout> | undefined
 
-    return matchesQuery && matchesStatus
-  }),
-)
+watch([search, statusFilter], () => {
+  clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => load(currentFilters()), 300)
+})
+
+onBeforeUnmount(() => clearTimeout(searchDebounce))
+
+function goToPage(page: number) {
+  load(currentFilters(page))
+}
 
 function handleEdit(product: Product) {
   openEdit(product)
 }
 
-function handleSubmit() {
-  upsert(form, editingSku.value)
-  close()
+async function handleSubmit() {
+  const result = await upsert(form, editingId.value)
+  if (result.ok) {
+    close()
+    return
+  }
+  formError.value = result.error
 }
+
+function handleOpenCreate() {
+  openCreate()
+  if (!categoryOptions.value.length) loadCategoryOptions()
+}
+
+async function handleToggleActive(product: Product) {
+  await toggleActive(product)
+}
+
+async function handleRemove(id: number) {
+  await remove(id)
+}
+
+onMounted(() => {
+  load(currentFilters())
+  loadCategoryOptions()
+})
 </script>
 
 <template>
@@ -66,7 +103,7 @@ function handleSubmit() {
         <button class="btn btn--ghost" type="button">
           <FileSpreadsheet :size="16" /><span>Excel</span>
         </button>
-        <button class="btn" type="button" @click="openCreate">
+        <button class="btn" type="button" @click="handleOpenCreate">
           <Plus :size="16" /><span>Adicionar Produto</span>
         </button>
       </div>
@@ -74,18 +111,24 @@ function handleSubmit() {
 
     <ProductsToolbar v-model:search="search" v-model:status="statusFilter" />
 
+    <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="isLoading" class="page-loading">A carregar produtos...</p>
+
     <section class="card card--table">
       <ProductsTable
-        :products="filteredProducts"
+        :products="products"
         @edit="handleEdit"
-        @toggle-active="toggleActive"
-        @remove="remove"
+        @toggle-active="handleToggleActive"
+        @remove="handleRemove"
       />
 
       <PaginationBar
-        :shown="filteredProducts.length"
-        :total="products.length"
+        :shown="products.length"
+        :total="meta.total"
+        :current-page="meta.currentPage"
+        :last-page="meta.lastPage"
         items-label="produtos"
+        @change="goToPage"
       />
     </section>
 
@@ -93,6 +136,8 @@ function handleSubmit() {
       v-model="isOpen"
       v-model:form="form"
       :is-editing="isEditing"
+      :category-options="categoryOptions"
+      :error-message="formError"
       @submit="handleSubmit"
     />
   </AppShell>
@@ -157,6 +202,24 @@ function handleSubmit() {
 
 .btn--ghost:hover {
   background: var(--color-surface-soft);
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.page-loading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
 
 .card {

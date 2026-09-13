@@ -1,25 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Order } from '../types/dashboard.types'
-import { ORDER_STATUS_COLORS, summarizeOrdersByStatus } from '../utils/orders'
+import { statusColorVar, statusLabel } from '@/features/orders/utils/orders'
+import type { OrderStatusSummary } from '../types/dashboard.types'
 
-const props = defineProps<{ orders: Order[] }>()
+const props = defineProps<{ summary: OrderStatusSummary[] }>()
 
 const RADIUS = 42
 const STROKE = 14
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const GAP = 2
 
-const summary = computed(() => summarizeOrdersByStatus(props.orders))
-
 const segments = computed(() => {
   let offset = 0
 
-  return summary.value.map((item) => {
+  return props.summary.map((item) => {
     const length = (item.percentage / 100) * CIRCUMFERENCE
     const segment = {
       ...item,
-      color: ORDER_STATUS_COLORS[item.status],
+      color: statusColorVar(item.status),
       dashArray: `${Math.max(length - GAP, 0)} ${CIRCUMFERENCE - length + GAP}`,
       dashOffset: -offset,
     }
@@ -28,7 +26,7 @@ const segments = computed(() => {
   })
 })
 
-const total = computed(() => props.orders.length)
+const total = computed(() => props.summary.reduce((sum, item) => sum + item.count, 0))
 </script>
 
 <template>
@@ -58,7 +56,7 @@ const total = computed(() => props.orders.length)
             :stroke-dasharray="segment.dashArray"
             :stroke-dashoffset="segment.dashOffset"
           >
-            <title>{{ segment.status }}: {{ segment.count }} ({{ segment.percentage }}%)</title>
+            <title>{{ statusLabel(segment.status) }}: {{ segment.count }} ({{ segment.percentage }}%)</title>
           </circle>
         </g>
       </svg>
@@ -71,7 +69,7 @@ const total = computed(() => props.orders.length)
     <ul class="donut__legend">
       <li v-for="segment in segments" :key="segment.status" class="donut__legend-item">
         <span class="donut__legend-dot" :style="{ background: segment.color }"></span>
-        <span class="donut__legend-label">{{ segment.status }}</span>
+        <span class="donut__legend-label">{{ statusLabel(segment.status) }}</span>
         <span class="donut__legend-value">{{ segment.count }} · {{ segment.percentage }}%</span>
       </li>
     </ul>

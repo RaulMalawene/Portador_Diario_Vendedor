@@ -1,53 +1,123 @@
 import { ref } from 'vue'
-import type { Product, ProductFormState, ProductStatus } from '../types/products.types'
-import { products as initialProducts } from '../data/products.mock'
+import { useAuthStore } from '@/stores/auth'
+import {
+  createProductRequest,
+  deleteProductRequest,
+  fetchCategoryOptionsRequest,
+  fetchProductsRequest,
+  updateProductRequest,
+  type ProductFilters,
+} from '../api/productsApi'
+import type { Product, ProductCategoryOption, ProductFormState } from '../types/products.types'
 
-function resolveStatus(previous: ProductStatus | undefined, stock: number): ProductStatus {
-  if (stock <= 0) return 'Esgotado'
-  if (previous === 'Esgotado') return 'Em Stock'
-  return previous ?? 'Em Stock'
-}
-
-function formatPrice(rawPrice: string): string {
-  const parsed = Number(rawPrice.replace(',', '.'))
-  return Number.isFinite(parsed) ? parsed.toFixed(2).replace('.', ',') : rawPrice
-}
+type Outcome = { ok: true } | { ok: false; error: string }
 
 export function useProducts() {
-  const products = ref<Product[]>([...initialProducts])
+  const authStore = useAuthStore()
 
-  function upsert(form: ProductFormState, editingSku: string | null) {
-    const stock = Number(form.stock)
-    const existing = editingSku
-      ? products.value.find((product) => product.sku === editingSku)
-      : undefined
+  const products = ref<Product[]>([])
+  const categoryOptions = ref<ProductCategoryOption[]>([])
+  const isLoading = ref(false)
+  const loadError = ref<string | null>(null)
+  const meta = ref({ total: 0, currentPage: 1, lastPage: 1 })
 
-    const entry: Product = {
-      name: form.name,
-      sku: form.sku,
-      categoria: form.category,
-      preco: formatPrice(form.price),
-      stock,
-      estado: resolveStatus(existing?.estado, stock),
-      active: form.isActive,
+  async function load(filters: ProductFilters = {}) {
+    const token = authStore.token
+    if (!token) return
+
+    isLoading.value = true
+    loadError.value = null
+
+    const result = await fetchProductsRequest(token, filters)
+    isLoading.value = false
+
+    if (!result.ok || !result.data) {
+      loadError.value = result.error ?? 'Não foi possível carregar os produtos.'
+      return
     }
 
-    if (existing) {
-      const index = products.value.indexOf(existing)
-      products.value.splice(index, 1, entry)
-    } else {
-      products.value.unshift(entry)
+    products.value = result.data.data
+    meta.value = {
+      total: result.data.meta.total,
+      currentPage: result.data.meta.current_page,
+      lastPage: result.data.meta.last_page,
     }
   }
 
-  function remove(sku: string) {
-    products.value = products.value.filter((product) => product.sku !== sku)
+  async function loadCategoryOptions() {
+    const token = authStore.token
+    if (!token) return
+
+    const result = await fetchCategoryOptionsRequest(token)
+    if (result.ok && result.data) categoryOptions.value = result.data.data
   }
 
-  function toggleActive(sku: string) {
-    const product = products.value.find((item) => item.sku === sku)
-    if (product) product.active = !product.active
+  async function upsert(form: ProductFormState, editingId: number | null): Promise<Outcome> {
+    const token = authStore.token
+    if (!token) return { ok: false, error: 'Sessão inválida. Inicie sessão novamente.' }
+
+    const payload = {
+      name: form.name.trim(),
+      sku: form.sku.trim(),
+      category_id: form.categoryId,
+      price: Number(form.price),
+      is_active: form.isActive,
+      // O stock só se altera pelo Inventário — só vai no pedido de criação.
+      ...(editingId === null ? { stock: Number(form.stock) } : {}),
+    }
+
+    const result = editingId
+      ? await updateProductRequest(token, editingId, payload)
+      : await createProductRequest(token, payload)
+
+    if (!result.ok || !result.data) {
+      return { ok: false, error: result.error ?? 'Não foi possível guardar o produto.' }
+    }
+
+    const saved = result.data.data
+    const index = products.value.findIndex((product) => product.id === saved.id)
+    if (index !== -1) products.value.splice(index, 1, saved)
+    else products.value.unshift(saved)
+
+    return { ok: true }
   }
 
-  return { products, upsert, remove, toggleActive }
+  async function remove(id: number): Promise<Outcome> {
+    const token = authStore.token
+    if (!token) return { ok: false, error: 'Sessão inválida. Inicie sessão novamente.' }
+
+    const result = await deleteProductRequest(token, id)
+    if (!result.ok) return { ok: false, error: result.error ?? 'Não foi possível eliminar o produto.' }
+
+    products.value = products.value.filter((product) => product.id !== id)
+    return { ok: true }
+  }
+
+  async function toggleActive(product: Product): Promise<Outcome> {
+    const token = authStore.token
+    if (!token) return { ok: false, error: 'Sessão inválida. Inicie sessão novamente.' }
+
+    const result = await updateProductRequest(token, product.id, { is_active: !product.is_active })
+    if (!result.ok || !result.data) {
+      return { ok: false, error: result.error ?? 'Não foi possível actualizar o estado.' }
+    }
+
+    const index = products.value.findIndex((item) => item.id === product.id)
+    if (index !== -1) products.value.splice(index, 1, result.data.data)
+
+    return { ok: true }
+  }
+
+  return {
+    products,
+    categoryOptions,
+    isLoading,
+    loadError,
+    meta,
+    load,
+    loadCategoryOptions,
+    upsert,
+    remove,
+    toggleActive,
+  }
 }

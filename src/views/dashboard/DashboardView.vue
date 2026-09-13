@@ -1,16 +1,67 @@
 <script setup lang="ts">
-import { Calendar, Download } from '@lucide/vue'
+import { computed, onMounted } from 'vue'
+import { AlertCircle, Boxes, Package, ShoppingCart, Users } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import AppFooter from '@/layouts/AppFooter.vue'
 import KpiCard from '@/features/dashboard/components/KpiCard.vue'
 import SalesBarChart from '@/features/dashboard/components/SalesBarChart.vue'
 import OrderStatusDonutChart from '@/features/dashboard/components/OrderStatusDonutChart.vue'
 import RecentOrdersTable from '@/features/dashboard/components/RecentOrdersTable.vue'
-import DeliveryProgressCard from '@/features/dashboard/components/DeliveryProgressCard.vue'
-import { kpis, orders, weeklySales } from '@/features/dashboard/data/dashboard.mock'
+import StockAlertsCard from '@/features/dashboard/components/StockAlertsCard.vue'
+import { useDashboard } from '@/features/dashboard/composables/useDashboard'
+import { formatCurrency } from '@/features/dashboard/utils/format'
 import { useAuthStore } from '@/stores/auth'
+import type { KpiMetric } from '@/features/dashboard/types/dashboard.types'
 
 const authStore = useAuthStore()
+const {
+  isLoading,
+  error,
+  totalRevenue,
+  totalOrders,
+  activeProducts,
+  totalCustomers,
+  statusSummary,
+  weeklySales,
+  recentOrders,
+  stockAlerts,
+  load,
+} = useDashboard()
+
+const pendingCount = computed(
+  () => statusSummary.value.find((item) => item.status === 'pending')?.count ?? 0,
+)
+const alertsCount = computed(() => stockAlerts.value.lowStock + stockAlerts.value.outOfStock)
+
+const kpis = computed<KpiMetric[]>(() => [
+  {
+    label: 'Receita Total',
+    value: formatCurrency(totalRevenue.value),
+    icon: ShoppingCart,
+    hint: `${totalOrders.value} ${totalOrders.value === 1 ? 'encomenda' : 'encomendas'} no total`,
+  },
+  {
+    label: 'Total de Encomendas',
+    value: String(totalOrders.value),
+    icon: Package,
+    hint: `${pendingCount.value} ${pendingCount.value === 1 ? 'pendente' : 'pendentes'}`,
+  },
+  {
+    label: 'Produtos Activos',
+    value: String(activeProducts.value),
+    icon: Boxes,
+    hint: alertsCount.value ? `${alertsCount.value} com alerta de stock` : 'stock saudável',
+  },
+  {
+    label: 'Clientes Registados',
+    value: String(totalCustomers.value),
+    icon: Users,
+  },
+])
+
+onMounted(() => {
+  load()
+})
 </script>
 
 <template>
@@ -25,15 +76,10 @@ const authStore = useAuthStore()
         <h1 class="page-title">Bem-vindo, {{ authStore.user?.name }}</h1>
         <p class="page-sub">Monitorize o desempenho do seu negócio em tempo real.</p>
       </div>
-      <div class="page-actions">
-        <button class="btn btn--ghost" type="button">
-          <Calendar :size="16" /><span>Últimos 30 dias</span>
-        </button>
-        <button class="btn" type="button">
-          <Download :size="16" /><span>Exportar Relatório</span>
-        </button>
-      </div>
     </div>
+
+    <p v-if="error" class="page-error"><AlertCircle :size="15" /> {{ error }}</p>
+    <p v-else-if="isLoading" class="page-loading">A carregar dados do dashboard...</p>
 
     <section class="kpis">
       <KpiCard v-for="metric in kpis" :key="metric.label" :metric="metric" />
@@ -43,14 +89,14 @@ const authStore = useAuthStore()
       <div class="grid__main">
         <section class="card">
           <h2 class="card__title">Vendas da Semana</h2>
-          <p class="card__sub">Receita diária nos últimos 7 dias.</p>
+          <p class="card__sub">Receita diária real nos últimos 7 dias.</p>
           <div class="card__chart">
             <SalesBarChart :points="weeklySales" />
           </div>
         </section>
 
         <section class="card">
-          <DeliveryProgressCard :current="92" :target="95" />
+          <StockAlertsCard :alerts="stockAlerts" />
         </section>
       </div>
 
@@ -59,12 +105,12 @@ const authStore = useAuthStore()
           <h2 class="card__title">Estado das Encomendas</h2>
           <p class="card__sub">Distribuição das encomendas por fase actual.</p>
           <div class="card__chart">
-            <OrderStatusDonutChart :orders="orders" />
+            <OrderStatusDonutChart :summary="statusSummary" />
           </div>
         </section>
 
         <section class="card">
-          <RecentOrdersTable :orders="orders" />
+          <RecentOrdersTable :orders="recentOrders" />
         </section>
       </aside>
     </div>
@@ -96,42 +142,22 @@ const authStore = useAuthStore()
   color: var(--color-body);
 }
 
-.page-actions {
-  display: flex;
-  flex-shrink: 0;
-  gap: 10px;
+.page-loading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
 
-.btn {
-  display: inline-flex;
+.page-error {
+  display: flex;
   align-items: center;
   gap: 8px;
-  height: 42px;
-  padding: 0 18px;
-  border: 0;
+  margin: 0 0 16px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
-  background: var(--brand-primary);
-  color: var(--color-surface);
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.btn:hover {
-  background: var(--brand-primary-dark);
-}
-
-.btn--ghost {
-  background: var(--color-surface);
-  color: var(--color-body);
-  border: 1px solid var(--color-border);
-}
-
-.btn--ghost:hover {
-  background: var(--color-surface-soft);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
 }
 
 .kpis {
