@@ -68,9 +68,6 @@ const router = createRouter({
       name: 'about',
       component: () => import('../views/AboutView.vue'),
     },
-    // Área do Cliente: telas separadas do sistema do fornecedor, usadas para
-    // testar pedidos reais ao backend (login, criar encomenda, ver estado),
-    // incluindo pedidos simultâneos abrindo várias abas.
     {
       path: '/cliente/login',
       name: 'cliente-login',
@@ -87,8 +84,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  // Área do Cliente: sessão e guarda próprias, independentes do portal do
-  // fornecedor abaixo.
   if (to.meta.requiresClientAuth && !hasStoredClientSession()) {
     return { name: 'cliente-login' }
   }

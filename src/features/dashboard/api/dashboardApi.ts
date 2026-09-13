@@ -20,7 +20,6 @@ export interface CountOutcome {
   count: number
 }
 
-/** Contagem de produtos que correspondem a um estado, sem carregar a lista toda. */
 export async function fetchProductCount(
   token: string,
   status: 'active' | 'low_stock' | 'out_of_stock',

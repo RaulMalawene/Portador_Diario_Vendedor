@@ -69,8 +69,6 @@ export function useProfileForm() {
       email: form.email.trim(),
       bank_name: form.bankName.trim(),
       bank_account_holder: form.bankAccountHolder.trim(),
-      // Só vai no pedido se o utilizador escrever um valor novo — em branco
-      // significa "não alterar", nunca "apagar" (a API não devolve o actual).
       ...(bankAccountNumber ? { bank_account_number: bankAccountNumber } : {}),
     })
 

@@ -83,7 +83,6 @@ export function updateOrderStatusRequest(token: string, id: number, status: stri
   })
 }
 
-/** Extrai o corpo de InsufficientStockException (422) quando presente. */
 export function extractStockConflict(errorPayload: unknown): StockConflict | null {
   if (!errorPayload || typeof errorPayload !== 'object') return null
   const { available, requested, product } = errorPayload as Record<string, unknown>
@@ -96,11 +95,8 @@ export interface OrdersOutcome {
   orders: OrderDto[]
 }
 
-// Limite de segurança ao percorrer todas as páginas de encomendas.
 const MAX_ORDER_PAGES = 20
 
-/** Vai buscar todas as encomendas (percorrendo as páginas), para agregados
- * honestos (receita, distribuição por estado) que a paginação não dá. */
 export async function fetchAllOrders(token: string): Promise<OrdersOutcome> {
   const first = await fetchOrdersRequest(token, { page: 1 })
   if (!first.ok || !first.data) return { ok: false, orders: [] }

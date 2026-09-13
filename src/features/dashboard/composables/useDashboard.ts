@@ -75,7 +75,6 @@ export function useDashboard() {
       }
     })
 
-    // Vendas reais dos últimos 7 dias (incluindo hoje), somadas por dia.
     const today = startOfDay(new Date())
     weeklySales.value = Array.from({ length: 7 }, (_, index) => {
       const dayStart = today - (6 - index) * DAY_MS

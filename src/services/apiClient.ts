@@ -1,11 +1,3 @@
-// Cliente HTTP fino e partilhado para falar com a API real em E:\Vendor-back
-// (Laravel + Sanctum, tokens Bearer) — usado tanto pelo login do fornecedor
-// (src/features/auth) como pela Área do Cliente de teste (src/features/loja).
-//
-// Não lança excepções: cada pedido devolve sempre um resultado tipado com o
-// estado HTTP e a mensagem de erro (extraída do JSON de validação do
-// Laravel quando existe).
-
 const DEFAULT_BASE_URL = 'http://localhost:8000/api'
 
 export const API_BASE_URL = (import.meta.env.VITE_API_URL || DEFAULT_BASE_URL).replace(/\/+$/, '')
@@ -15,8 +7,6 @@ export interface ApiResult<T> {
   status: number | null
   data: T | null
   error: string | null
-  /** Corpo bruto da resposta de erro, para quem precisar de mais do que a
-   * mensagem (ex.: os campos extra de InsufficientStockException). */
   errorPayload: unknown
 }
 
@@ -42,7 +32,6 @@ function buildUrl(path: string, query?: RequestOptions['query']): string {
   return url.toString()
 }
 
-/** O Laravel devolve `{ message, errors: { campo: [msgs] } }` em erros 422. */
 function extractErrorMessage(payload: unknown, fallback: string): string {
   if (payload && typeof payload === 'object') {
     const { errors, message } = payload as LaravelErrorPayload
@@ -73,7 +62,6 @@ export async function apiRequest<T>(
       try {
         payload = JSON.parse(raw)
       } catch {
-        // Resposta não é JSON (ex.: página de erro do servidor).
         return {
           ok: false,
           status: response.status,

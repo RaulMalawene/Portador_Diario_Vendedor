@@ -19,8 +19,6 @@ const { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, clo
 
 const search = ref('')
 
-// A lista de categorias não é paginada pela API, por isso o filtro de
-// pesquisa é feito aqui mesmo, sobre os dados já carregados.
 const filteredCategories = computed(() => {
   const query = search.value.trim().toLowerCase()
   if (!query) return categories.value

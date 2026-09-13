@@ -1,8 +1,3 @@
-// Tipos alinhados ao contrato real da API (E:\Vendor-back).
-// Nota: o login é feito com uma conta de fornecedor (User) — a API não tem
-// contas próprias para clientes finais. Esta tela simula um "cliente" ao
-// criar encomendas em nome de um Customer escolhido, sob a conta autenticada.
-
 export interface AuthenticatedUser {
   id: number
   name: string
@@ -64,7 +59,6 @@ export interface ClientOrder {
   items?: OrderItemDto[]
 }
 
-/** Resultado da última acção (enviar encomenda, etc.), para mostrar no ecrã. */
 export interface RequestFeedback {
   ok: boolean
   message: string

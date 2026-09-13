@@ -11,8 +11,6 @@ defineEmits<{ edit: []; remove: [] }>()
 
 <template>
   <article class="cat-card" :class="`cat-card--${category.theme}`">
-    <!-- Camada puramente decorativa: fica recortada aos cantos arredondados do
-         card, sem afectar o menu (que precisa de "escapar" para fora do card). -->
     <span class="cat-card__decor" aria-hidden="true">
       <span class="cat-card__glow"></span>
     </span>
@@ -60,8 +58,6 @@ defineEmits<{ edit: []; remove: [] }>()
   transform: translateY(-3px);
 }
 
-/* Wrapper isolado que recorta a "glow" e a barra de cor aos cantos do
-   card — nunca contém o menu, para o dropdown poder sair do card. */
 .cat-card__decor {
   position: absolute;
   inset: 0;
@@ -127,9 +123,6 @@ defineEmits<{ edit: []; remove: [] }>()
 
 .cat-card__head {
   position: relative;
-  /* Tem de ficar acima do body/footer (ver baixo) para o menu de acções
-     (posicionado de forma absoluta dentro do header) nunca ficar tapado
-     por eles — com z-index igual, o elemento mais tarde no DOM ganha. */
   z-index: 2;
   display: flex;
   align-items: flex-start;

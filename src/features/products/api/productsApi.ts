@@ -52,7 +52,6 @@ export function deleteProductRequest(token: string, id: number) {
   return apiRequest<{ message: string }>(`/products/${id}`, { method: 'DELETE', token })
 }
 
-/** Lista de categorias do fornecedor, só para preencher o selector do formulário. */
 export function fetchCategoryOptionsRequest(token: string) {
   return apiRequest<Collection<ProductCategoryOption>>('/categories', { token })
 }

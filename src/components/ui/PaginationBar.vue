@@ -19,7 +19,6 @@ const props = withDefaults(
 
 const emit = defineEmits<{ change: [page: number] }>()
 
-// Janela de até 5 números de página à volta da página actual.
 const pages = computed(() => {
   const start = Math.max(1, Math.min(props.currentPage - 2, props.lastPage - 4))
   const end = Math.min(props.lastPage, Math.max(props.currentPage + 2, 5))

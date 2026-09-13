@@ -1,7 +1,5 @@
 import type { StockStatus } from '../types/inventory.types'
 
-// O estado de stock já vem calculado pelo backend (Product::stockStatus(),
-// limiar de 5 unidades) — não é recalculado aqui, para nunca desalinhar.
 const STATUS_LABEL: Record<StockStatus, string> = {
   in_stock: 'Em Stock',
   low_stock: 'Stock Baixo',

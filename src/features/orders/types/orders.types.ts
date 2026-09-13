@@ -1,5 +1,3 @@
-// O backend não tem estado "cancelada" nem endpoint de cancelamento — só
-// permite avançar a sequência abaixo, um passo de cada vez.
 export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered'
 
 export type StatusBadgeVariant = 'neutral' | 'info' | 'warning' | 'teal' | 'success'
@@ -49,7 +47,6 @@ export interface Order {
   history: OrderHistoryEntry[]
 }
 
-/** Corpo de InsufficientStockException (422) ao tentar confirmar uma encomenda. */
 export interface StockConflict {
   product: string | null
   available: number

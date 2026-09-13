@@ -84,9 +84,7 @@ async function copyNumber() {
     await navigator.clipboard.writeText(order.value.number)
     copied.value = true
     setTimeout(() => (copied.value = false), 1800)
-  } catch {
-    // clipboard unavailable — silently ignore
-  }
+  } catch {}
 }
 
 function goBack() {

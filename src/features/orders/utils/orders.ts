@@ -8,10 +8,6 @@ export const STATUS_SEQUENCE: OrderStatus[] = [
   'delivered',
 ]
 
-// Rótulos alinhados exactamente com App\Enums\OrderStatus::label() no backend
-// — usados aqui só para a legenda genérica do stepper e o filtro da toolbar.
-// Para o estado de uma encomenda concreta, usa sempre `order.statusLabel`
-// (vem da API), nunca `statusLabel(order.status)`.
 export const STATUS_META: Record<OrderStatus, OrderStatusMeta> = {
   pending: { label: 'Pendente', badge: 'neutral' },
   confirmed: { label: 'Confirmada', badge: 'info' },
@@ -40,7 +36,6 @@ export function statusColorVar(status: OrderStatus): string {
   return `var(${BADGE_COLOR_VAR[STATUS_META[status].badge]})`
 }
 
-/** Total de unidades pedidas (soma as quantidades de todas as linhas). */
 export function itemsCount(order: Order): number {
   return order.items.reduce((sum, item) => sum + item.quantity, 0)
 }

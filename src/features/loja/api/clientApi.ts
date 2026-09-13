@@ -25,7 +25,6 @@ export function fetchCustomersRequest(token: string) {
 }
 
 export function fetchProductsRequest(token: string) {
-  // Só produtos activos: são os únicos que a API aceita numa encomenda.
   return apiRequest<Collection<CatalogProduct>>('/products', {
     token,
     query: { status: 'active' },

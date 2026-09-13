@@ -30,7 +30,6 @@ export function useClientOrders(getToken: () => string | null) {
     cart.value.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
   )
 
-  /** Carrega os clientes e produtos do fornecedor autenticado, para os selectores. */
   async function loadOptions() {
     const token = getToken()
     if (!token) return

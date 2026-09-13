@@ -92,7 +92,6 @@ export function useOrders() {
     }
   }
 
-  /** KPIs honestos calculados sobre TODAS as encomendas, não só a página actual. */
   async function loadKpis() {
     const token = authStore.token
     if (!token) return
@@ -121,7 +120,6 @@ export function useOrders() {
     return result.ok && result.data ? toOrder(result.data.data) : null
   }
 
-  /** Avança a encomenda para o próximo estado (a API só permite um passo de cada vez). */
   async function advance(order: Order): Promise<AdvanceResult> {
     const token = authStore.token
     if (!token || !order.nextStatus) {

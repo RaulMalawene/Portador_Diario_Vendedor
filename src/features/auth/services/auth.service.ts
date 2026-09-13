@@ -10,8 +10,6 @@ export interface AuthUser {
 
 interface AuthResponse {
   token: string
-  // A API devolve também os dados da empresa (`company`) aqui, mas não são
-  // necessários no frontend — só guardamos o essencial da conta.
   user: AuthUser
 }
 
@@ -47,8 +45,6 @@ export function logout(token: string): Promise<ApiResult<{ message: string }>> {
   return apiRequest<{ message: string }>('/logout', { method: 'POST', token })
 }
 
-// A recuperação de password mantém-se simulada por agora: o backend ainda
-// não expõe esse endpoint.
 export async function requestPasswordReset(email: string): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS))
 

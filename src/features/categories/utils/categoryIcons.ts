@@ -41,9 +41,6 @@ export type CategoryIconKey = keyof typeof categoryIcons
 
 export const categoryIconOptions = Object.keys(categoryIcons) as CategoryIconKey[]
 
-// Palavras-chave associadas a cada ícone, usadas para escolher automaticamente
-// um ícone com base no nome da categoria (o utilizador já não escolhe o ícone
-// manualmente na criação/edição).
 const ICON_KEYWORDS: Partial<Record<CategoryIconKey, string[]>> = {
   utensils: ['aliment', 'comida', 'cereal', 'mercearia', 'mantiment'],
   drink: ['bebida', 'refrigerante', 'sumo', 'agua'],
@@ -70,7 +67,6 @@ function normalize(value: string): string {
     .replace(/[̀-ͯ]/g, '')
 }
 
-/** Sugere um ícone com base no nome da categoria; usa "package" por defeito. */
 export function guessCategoryIcon(name: string): CategoryIconKey {
   const normalized = normalize(name)
   for (const [icon, keywords] of Object.entries(ICON_KEYWORDS) as [

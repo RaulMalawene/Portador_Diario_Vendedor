@@ -11,8 +11,6 @@ interface Resource<T> {
 export interface CategoryApiItem {
   id: number
   name: string
-  // Só vem preenchido na listagem (o backend usa `withCount`); ausente nas
-  // respostas de criação/actualização de uma única categoria.
   products_count?: number
   created_at: string
 }

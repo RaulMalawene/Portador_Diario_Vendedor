@@ -26,7 +26,7 @@ async function onSubmit() {
     <header class="login-form__header">
       <h1 class="login-form__title">Aceder à conta</h1>
       <p class="login-form__subtitle">
-        Introduza as suas credenciais para gerir as suas entregas no portal do fornecedor.
+        Introduza as suas credenciais para gerir as suas entregas no portal do vendedor.
       </p>
     </header>
 
@@ -72,7 +72,7 @@ async function onSubmit() {
     <p class="login-form__footer">
       Ainda não é parceiro?
       <RouterLink class="login-form__footer-link" to="/registo"
-        >Registe a sua empresa agora</RouterLink
+        >Registe a sua conta agora</RouterLink
       >
     </p>
   </form>

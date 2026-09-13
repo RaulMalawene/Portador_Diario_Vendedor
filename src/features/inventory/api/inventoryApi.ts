@@ -70,7 +70,6 @@ export function fetchStockMovementsRequest(token: string, productId: number) {
   })
 }
 
-/** Extrai o corpo de InsufficientStockException (422) quando presente. */
 export function extractStockConflict(errorPayload: unknown): StockConflict | null {
   if (!errorPayload || typeof errorPayload !== 'object') return null
   const { available, requested } = errorPayload as Record<string, unknown>
@@ -85,8 +84,6 @@ export interface InventoryOutcome {
 
 const MAX_INVENTORY_PAGES = 20
 
-/** Vai buscar todo o inventário (percorrendo as páginas), para o valor
- * total em stock — a paginação não dá essa soma. */
 export async function fetchAllInventory(token: string): Promise<InventoryOutcome> {
   const first = await fetchInventoryRequest(token, { page: 1 })
   if (!first.ok || !first.data) return { ok: false, items: [] }

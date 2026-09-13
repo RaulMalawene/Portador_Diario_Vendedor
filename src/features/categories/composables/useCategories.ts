@@ -17,8 +17,6 @@ function toCategory(item: CategoryApiItem): Category {
   return {
     id: item.id,
     name: item.name,
-    // Uma categoria acabada de criar ainda não tem produtos; ao editar,
-    // mantém-se a contagem já conhecida (o backend não a devolve aqui).
     productsCount: item.products_count ?? 0,
     icon: guessCategoryIcon(item.name),
     theme: pickCategoryTheme(item.name),
@@ -65,8 +63,6 @@ export function useCategories() {
     const saved = toCategory(result.data.data)
     const index = categories.value.findIndex((category) => category.id === saved.id)
     if (index !== -1) {
-      // A resposta de actualização não traz products_count — mantém a
-      // contagem já conhecida em vez de a apagar para 0.
       saved.productsCount = categories.value[index]!.productsCount
       categories.value.splice(index, 1, saved)
     } else {

@@ -25,8 +25,6 @@ const selectedCustomerId = defineModel<number | null>('selectedCustomerId', { re
 const selectedProductId = ref<number | null>(props.catalog[0]?.id ?? null)
 const quantity = ref(1)
 
-// O catálogo chega de forma assíncrona (pedido à API); assim que estiver
-// disponível, selecciona o primeiro produto por defeito.
 watch(
   () => props.catalog,
   (list) => {

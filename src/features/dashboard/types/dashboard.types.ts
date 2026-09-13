@@ -19,7 +19,6 @@ export interface OrderStatusSummary {
   percentage: number
 }
 
-/** Encomenda tal como vem da API (subconjunto do OrderResource do backend). */
 export interface DashboardOrder {
   id: number
   number: string

@@ -85,7 +85,6 @@ export function useInventory() {
     }
   }
 
-  /** KPIs honestos sobre TODO o inventário, não só a página actual. */
   async function loadKpis() {
     const token = authStore.token
     if (!token) return

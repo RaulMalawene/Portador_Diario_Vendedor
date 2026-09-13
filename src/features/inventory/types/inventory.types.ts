@@ -29,7 +29,6 @@ export interface AdjustFormState {
   note: string
 }
 
-/** Corpo de InsufficientStockException (422) ao ajustar stock abaixo de zero. */
 export interface StockConflict {
   available: number
   requested: number

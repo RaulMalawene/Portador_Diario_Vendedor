@@ -61,8 +61,6 @@ export const useAuthStore = defineStore('auth', () => {
       return { ok: false, error: result.error ?? fallbackError }
     }
 
-    // A resposta traz também os dados da empresa (`company`); guardamos só
-    // o essencial da conta em vez de passar o objecto completo adiante.
     const { id, name, email } = result.data.user
     token.value = result.data.token
     user.value = { id, name, email }
@@ -87,7 +85,6 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     persist()
 
-    // Tenta revogar o token no servidor; não bloqueia o logout se falhar.
     if (currentToken) void logoutRequest(currentToken)
   }
 

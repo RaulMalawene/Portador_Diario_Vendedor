@@ -62,7 +62,6 @@ export function useProducts() {
       category_id: form.categoryId,
       price: Number(form.price),
       is_active: form.isActive,
-      // O stock só se altera pelo Inventário — só vai no pedido de criação.
       ...(editingId === null ? { stock: Number(form.stock) } : {}),
     }
 

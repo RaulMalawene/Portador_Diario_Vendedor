@@ -34,7 +34,6 @@ async function handleLogout() {
   const token = session.value?.token
   clearSession()
   router.push('/cliente/login')
-  // Tenta revogar o token no servidor; não bloqueia a navegação se falhar.
   if (token) await logoutRequest(token)
 }
 

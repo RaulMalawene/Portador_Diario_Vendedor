@@ -1,10 +1,6 @@
 import { ref } from 'vue'
 import type { ClientSession } from '../types/client.types'
 
-// sessionStorage (não localStorage) é intencional: cada separador do
-// navegador fica com a sua própria sessão, o que permite abrir várias abas
-// autenticadas (à mesma conta ou a contas diferentes) para testar pedidos
-// simultâneos ao backend.
 const STORAGE_KEY = 'loja.session'
 
 function readStoredSession(): ClientSession | null {
@@ -32,7 +28,6 @@ export function useClientSession() {
   return { session, setSession, clearSession }
 }
 
-/** Leitura simples (sem reactividade), usada pelo guarda de rotas. */
 export function hasStoredClientSession(): boolean {
   return readStoredSession() !== null
 }
