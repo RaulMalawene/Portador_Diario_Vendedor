@@ -54,16 +54,16 @@ function toggleSort() {
       <tr v-if="sortedItems.length === 0">
         <td class="table__empty" colspan="6">Nenhum item encontrado.</td>
       </tr>
-      <tr v-for="item in sortedItems" :key="item.sku">
+      <tr v-for="item in sortedItems" :key="item.id">
         <td class="td-strong td-truncate">{{ item.name }}</td>
         <td class="td-mono td-truncate">{{ item.sku }}</td>
-        <td class="td-muted td-truncate">{{ item.categoria }}</td>
+        <td class="td-muted td-truncate">{{ item.category ?? 'Sem categoria' }}</td>
         <td class="td-mono" :class="{ 'td-zero': item.stock === 0 }">
           {{ item.stock }} <span class="td-unit">un</span>
         </td>
         <td>
-          <StatusBadge :variant="stockStatusVariant(item.stock)">{{
-            stockStatusLabel(item.stock)
+          <StatusBadge :variant="stockStatusVariant(item.stockStatus)">{{
+            stockStatusLabel(item.stockStatus)
           }}</StatusBadge>
         </td>
         <td class="ta-right">

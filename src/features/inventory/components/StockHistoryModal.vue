@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import AppModal from '@/components/ui/AppModal.vue'
 import type { InventoryItem, StockMovement } from '../types/inventory.types'
-import { movementLabel } from '../utils/inventory'
 
 defineProps<{
   item: InventoryItem | null
   movements: StockMovement[]
+  isLoading: boolean
 }>()
 
 const isOpen = defineModel<boolean>({ required: true })
+
+function formatDate(value: string): string {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('pt-PT')
+}
 </script>
 
 <template>
@@ -17,10 +22,11 @@ const isOpen = defineModel<boolean>({ required: true })
     <p v-if="item" class="modal__sub">{{ item.name }}</p>
 
     <div class="modal__body">
-      <ul v-if="movements.length" class="timeline">
-        <li v-for="(movement, index) in movements" :key="index" class="tl">
+      <p v-if="isLoading" class="timeline__empty">A carregar histórico...</p>
+      <ul v-else-if="movements.length" class="timeline">
+        <li v-for="movement in movements" :key="movement.id" class="tl">
           <span class="tl__badge" :class="`tl__badge--${movement.type}`">
-            {{ movementLabel(movement.type) }}
+            {{ movement.typeLabel }}
           </span>
           <div class="tl__body">
             <div class="tl__top">
@@ -29,8 +35,8 @@ const isOpen = defineModel<boolean>({ required: true })
               </span>
               <span class="tl__after">ficou em {{ movement.stockAfter }} un</span>
             </div>
-            <p class="tl__note">{{ movement.note }}</p>
-            <span class="tl__date">{{ movement.date }}</span>
+            <p v-if="movement.note" class="tl__note">{{ movement.note }}</p>
+            <span class="tl__date">{{ formatDate(movement.date) }}</span>
           </div>
         </li>
       </ul>

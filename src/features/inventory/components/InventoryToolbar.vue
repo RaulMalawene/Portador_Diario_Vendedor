@@ -6,7 +6,6 @@ const status = defineModel<string>('status', { default: 'all' })
 
 const statusOptions = [
   { value: 'all', label: 'Todos os Estados' },
-  { value: 'in_stock', label: 'Em Stock' },
   { value: 'low_stock', label: 'Stock Baixo' },
   { value: 'out_of_stock', label: 'Sem Stock' },
 ]

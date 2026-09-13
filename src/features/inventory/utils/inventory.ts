@@ -1,13 +1,7 @@
-import type { MovementType, StockStatus } from '../types/inventory.types'
+import type { StockStatus } from '../types/inventory.types'
 
-const LOW_STOCK_THRESHOLD = 5
-
-export function stockStatus(stock: number): StockStatus {
-  if (stock <= 0) return 'out_of_stock'
-  if (stock <= LOW_STOCK_THRESHOLD) return 'low_stock'
-  return 'in_stock'
-}
-
+// O estado de stock já vem calculado pelo backend (Product::stockStatus(),
+// limiar de 5 unidades) — não é recalculado aqui, para nunca desalinhar.
 const STATUS_LABEL: Record<StockStatus, string> = {
   in_stock: 'Em Stock',
   low_stock: 'Stock Baixo',
@@ -20,22 +14,12 @@ const STATUS_VARIANT: Record<StockStatus, 'success' | 'warning' | 'danger'> = {
   out_of_stock: 'danger',
 }
 
-export function stockStatusLabel(stock: number): string {
-  return STATUS_LABEL[stockStatus(stock)]
+export function stockStatusLabel(status: StockStatus): string {
+  return STATUS_LABEL[status]
 }
 
-export function stockStatusVariant(stock: number) {
-  return STATUS_VARIANT[stockStatus(stock)]
-}
-
-const MOVEMENT_LABEL: Record<MovementType, string> = {
-  in: 'Entrada',
-  out: 'Saída',
-  adjustment: 'Correção',
-}
-
-export function movementLabel(type: MovementType): string {
-  return MOVEMENT_LABEL[type]
+export function stockStatusVariant(status: StockStatus) {
+  return STATUS_VARIANT[status]
 }
 
 export function formatCurrency(value: number): string {

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ChevronDown, ArrowDownToLine, ArrowUpFromLine, Pencil } from '@lucide/vue'
+import { AlertCircle, ChevronDown, ArrowDownToLine, ArrowUpFromLine, Pencil } from '@lucide/vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import type { AdjustFormState, InventoryItem } from '../types/inventory.types'
 
 const props = defineProps<{
   items: InventoryItem[]
+  isSubmitting: boolean
+  errorMessage?: string | null
 }>()
 
 const isOpen = defineModel<boolean>({ required: true })
@@ -17,7 +19,7 @@ function close() {
   isOpen.value = false
 }
 
-const selectedItem = computed(() => props.items.find((item) => item.sku === form.value.sku))
+const selectedItem = computed(() => props.items.find((item) => item.id === form.value.productId))
 
 const currentStock = computed(() => selectedItem.value?.stock ?? 0)
 
@@ -30,7 +32,9 @@ const newStock = computed(() => {
 
 const isNegative = computed(() => newStock.value < 0)
 
-const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
+const canSubmit = computed(
+  () => !isNegative.value && form.value.productId !== null && !props.isSubmitting,
+)
 </script>
 
 <template>
@@ -38,12 +42,16 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
     <h2 id="stock-adjust-title" class="modal__title">Ajustar Stock</h2>
 
     <form class="modal__body" novalidate @submit.prevent="emit('submit')">
+      <p v-if="errorMessage" class="modal__error">
+        <AlertCircle :size="15" /> {{ errorMessage }}
+      </p>
+
       <label class="field">
         <span class="field__label">Produto</span>
         <div class="select select--full">
-          <select v-model="form.sku" required>
-            <option value="" disabled>Seleccione um produto</option>
-            <option v-for="item in items" :key="item.sku" :value="item.sku">
+          <select v-model="form.productId" required>
+            <option :value="null" disabled>Seleccione um produto</option>
+            <option v-for="item in items" :key="item.id" :value="item.id">
               {{ item.name }} ({{ item.sku }})
             </option>
           </select>
@@ -121,7 +129,9 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
 
       <div class="modal__foot">
         <button class="btn btn--ghost" type="button" @click="close">Cancelar</button>
-        <button class="btn" type="submit" :disabled="!canSubmit">Guardar Movimento</button>
+        <button class="btn" type="submit" :disabled="!canSubmit">
+          {{ isSubmitting ? 'A guardar...' : 'Guardar Movimento' }}
+        </button>
       </div>
     </form>
   </AppModal>
@@ -133,6 +143,18 @@ const canSubmit = computed(() => !isNegative.value && Boolean(form.value.sku))
   font-size: 18px;
   font-weight: 700;
   color: var(--color-ink);
+}
+
+.modal__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
 }
 
 .field {

@@ -1,52 +1,151 @@
-import { computed, ref } from 'vue'
-import type { InventoryItem, MovementType, StockMovement } from '../types/inventory.types'
-import { inventoryItems as initialItems, initialMovements } from '../data/inventory.mock'
-import { movementLabel, stockStatus } from '../utils/inventory'
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import {
+  adjustStockRequest,
+  extractStockConflict,
+  fetchAllInventory,
+  fetchInventoryRequest,
+  fetchStockMovementsRequest,
+  type InventoryFilters,
+  type InventoryProductDto,
+  type StockMovementDto,
+} from '../api/inventoryApi'
+import type {
+  InventoryItem,
+  MovementType,
+  StockConflict,
+  StockMovement,
+  StockStatus,
+} from '../types/inventory.types'
+
+type Outcome = { ok: true } | { ok: false; error: string; conflict?: StockConflict }
+
+function toItem(dto: InventoryProductDto): InventoryItem {
+  return {
+    id: dto.id,
+    name: dto.name,
+    sku: dto.sku,
+    category: dto.category?.name ?? null,
+    stock: dto.stock,
+    unitPrice: Number(dto.price),
+    stockStatus: dto.stock_status as StockStatus,
+  }
+}
+
+function toMovement(dto: StockMovementDto): StockMovement {
+  return {
+    id: dto.id,
+    type: dto.type,
+    typeLabel: dto.type_label,
+    quantity: dto.quantity,
+    stockAfter: dto.stock_after,
+    note: dto.note,
+    date: dto.created_at,
+  }
+}
+
+export interface InventoryKpis {
+  total: number
+  low: number
+  out: number
+  totalValue: number
+}
 
 export function useInventory() {
-  const items = ref<InventoryItem[]>([...initialItems])
-  const movementsBySku = ref<Record<string, StockMovement[]>>(structuredClone(initialMovements))
+  const authStore = useAuthStore()
 
-  const kpis = computed(() => ({
-    total: items.value.length,
-    low: items.value.filter((item) => stockStatus(item.stock) === 'low_stock').length,
-    out: items.value.filter((item) => stockStatus(item.stock) === 'out_of_stock').length,
-    totalValue: items.value.reduce((sum, item) => sum + item.stock * item.unitPrice, 0),
-  }))
+  const items = ref<InventoryItem[]>([])
+  const isLoading = ref(false)
+  const loadError = ref<string | null>(null)
+  const meta = ref({ total: 0, currentPage: 1, lastPage: 1 })
 
-  function movementsFor(sku: string): StockMovement[] {
-    return movementsBySku.value[sku] ?? []
-  }
+  const kpis = ref<InventoryKpis>({ total: 0, low: 0, out: 0, totalValue: 0 })
+  const isLoadingKpis = ref(false)
 
-  function adjustStock(sku: string, type: MovementType, quantity: number, note: string) {
-    const item = items.value.find((entry) => entry.sku === sku)
-    if (!item) return false
+  async function load(filters: InventoryFilters = {}) {
+    const token = authStore.token
+    if (!token) return
 
-    const previousStock = item.stock
-    const stockAfter =
-      type === 'in'
-        ? previousStock + quantity
-        : type === 'out'
-          ? previousStock - quantity
-          : quantity
+    isLoading.value = true
+    loadError.value = null
 
-    if (stockAfter < 0) return false
+    const result = await fetchInventoryRequest(token, filters)
+    isLoading.value = false
 
-    item.stock = stockAfter
-
-    const delta = type === 'out' ? -quantity : type === 'in' ? quantity : stockAfter - previousStock
-
-    const movement: StockMovement = {
-      type,
-      quantity: delta,
-      stockAfter,
-      note: note.trim() || `${movementLabel(type)} manual`,
-      date: new Date().toLocaleString('pt-PT'),
+    if (!result.ok || !result.data) {
+      loadError.value = result.error ?? 'Não foi possível carregar o inventário.'
+      return
     }
 
-    movementsBySku.value[sku] = [movement, ...movementsFor(sku)]
-    return true
+    items.value = result.data.data.map(toItem)
+    meta.value = {
+      total: result.data.meta.total,
+      currentPage: result.data.meta.current_page,
+      lastPage: result.data.meta.last_page,
+    }
   }
 
-  return { items, kpis, movementsFor, adjustStock }
+  /** KPIs honestos sobre TODO o inventário, não só a página actual. */
+  async function loadKpis() {
+    const token = authStore.token
+    if (!token) return
+
+    isLoadingKpis.value = true
+    const result = await fetchAllInventory(token)
+    isLoadingKpis.value = false
+
+    if (!result.ok) return
+
+    const all = result.items
+    kpis.value = {
+      total: all.length,
+      low: all.filter((item) => item.stock_status === 'low_stock').length,
+      out: all.filter((item) => item.stock_status === 'out_of_stock').length,
+      totalValue: all.reduce((sum, item) => sum + item.stock * Number(item.price), 0),
+    }
+  }
+
+  async function movementsFor(productId: number): Promise<StockMovement[]> {
+    const token = authStore.token
+    if (!token) return []
+
+    const result = await fetchStockMovementsRequest(token, productId)
+    return result.ok && result.data ? result.data.data.map(toMovement) : []
+  }
+
+  async function adjustStock(
+    productId: number,
+    type: MovementType,
+    quantity: number,
+    note: string,
+  ): Promise<Outcome> {
+    const token = authStore.token
+    if (!token) return { ok: false, error: 'Sessão inválida. Inicie sessão novamente.' }
+
+    const result = await adjustStockRequest(token, productId, type, quantity, note.trim())
+
+    if (!result.ok || !result.data) {
+      const conflict = extractStockConflict(result.errorPayload) ?? undefined
+      return { ok: false, error: result.error ?? 'Não foi possível ajustar o stock.', conflict }
+    }
+
+    const saved = toItem(result.data.data)
+    const index = items.value.findIndex((item) => item.id === saved.id)
+    if (index !== -1) items.value.splice(index, 1, saved)
+
+    return { ok: true }
+  }
+
+  return {
+    items,
+    isLoading,
+    loadError,
+    meta,
+    kpis,
+    isLoadingKpis,
+    load,
+    loadKpis,
+    movementsFor,
+    adjustStock,
+  }
 }

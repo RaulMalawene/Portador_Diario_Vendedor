@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { FileDown, Plus, Package, SlidersHorizontal, Boxes } from '@lucide/vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { AlertCircle, FileDown, Plus, Package, SlidersHorizontal, Boxes } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import PaginationBar from '@/components/ui/PaginationBar.vue'
 import InventoryToolbar from '@/features/inventory/components/InventoryToolbar.vue'
@@ -10,50 +10,84 @@ import StockAdjustModal from '@/features/inventory/components/StockAdjustModal.v
 import StockHistoryModal from '@/features/inventory/components/StockHistoryModal.vue'
 import { useInventory } from '@/features/inventory/composables/useInventory'
 import { useStockAdjustForm } from '@/features/inventory/composables/useStockAdjustForm'
-import { formatCurrency, stockStatus } from '@/features/inventory/utils/inventory'
+import { formatCurrency } from '@/features/inventory/utils/inventory'
 import type { InventoryItem } from '@/features/inventory/types/inventory.types'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const { items, kpis, movementsFor, adjustStock } = useInventory()
+const { items, isLoading, loadError, meta, kpis, load, loadKpis, movementsFor, adjustStock } =
+  useInventory()
 const {
   isOpen: isAdjustOpen,
   form: adjustForm,
+  formError: adjustError,
   open: openAdjust,
   close: closeAdjust,
 } = useStockAdjustForm()
 
+const isSubmittingAdjust = ref(false)
+
 const search = ref('')
 const statusFilter = ref('all')
 
-const filteredItems = computed(() =>
-  items.value.filter((item) => {
-    const query = search.value.trim().toLowerCase()
-    const matchesQuery =
-      !query || item.name.toLowerCase().includes(query) || item.sku.toLowerCase().includes(query)
-    const matchesStatus =
-      statusFilter.value === 'all' || statusFilter.value === stockStatus(item.stock)
-    return matchesQuery && matchesStatus
-  }),
-)
+function currentFilters(page = 1) {
+  return {
+    search: search.value.trim() || undefined,
+    status: statusFilter.value === 'all' ? undefined : (statusFilter.value as 'low_stock' | 'out_of_stock'),
+    page,
+  }
+}
 
-function handleSubmitAdjust() {
+let searchDebounce: ReturnType<typeof setTimeout> | undefined
+
+watch([search, statusFilter], () => {
+  clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => load(currentFilters()), 300)
+})
+
+onBeforeUnmount(() => clearTimeout(searchDebounce))
+
+function goToPage(page: number) {
+  load(currentFilters(page))
+}
+
+async function handleSubmitAdjust() {
+  if (adjustForm.productId === null) return
+
   const quantity = Number(adjustForm.quantity) || 0
-  const saved = adjustStock(adjustForm.sku, adjustForm.type, quantity, adjustForm.note)
-  if (saved) closeAdjust()
+  isSubmittingAdjust.value = true
+  const result = await adjustStock(adjustForm.productId, adjustForm.type, quantity, adjustForm.note)
+  isSubmittingAdjust.value = false
+
+  if (result.ok) {
+    closeAdjust()
+    loadKpis()
+    return
+  }
+
+  adjustError.value = result.conflict
+    ? `Stock insuficiente. Disponível: ${result.conflict.available}, pedido: ${result.conflict.requested}.`
+    : result.error
 }
 
 const isHistoryOpen = ref(false)
 const historyItem = ref<InventoryItem | null>(null)
-const historyMovements = computed(() =>
-  historyItem.value ? movementsFor(historyItem.value.sku) : [],
-)
+const historyMovements = ref<Awaited<ReturnType<typeof movementsFor>>>([])
+const isLoadingHistory = ref(false)
 
-function openHistory(item: InventoryItem) {
+async function openHistory(item: InventoryItem) {
   historyItem.value = item
   isHistoryOpen.value = true
+  isLoadingHistory.value = true
+  historyMovements.value = await movementsFor(item.id)
+  isLoadingHistory.value = false
 }
+
+onMounted(() => {
+  load(currentFilters())
+  loadKpis()
+})
 </script>
 
 <template>
@@ -110,20 +144,37 @@ function openHistory(item: InventoryItem) {
 
     <InventoryToolbar v-model:search="search" v-model:status="statusFilter" />
 
-    <section class="card card--table">
-      <InventoryTable :items="filteredItems" @adjust="openAdjust" @history="openHistory" />
+    <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="isLoading" class="page-loading">A carregar inventário...</p>
 
-      <PaginationBar :shown="filteredItems.length" :total="items.length" items-label="itens" />
+    <section class="card card--table">
+      <InventoryTable :items="items" @adjust="openAdjust" @history="openHistory" />
+
+      <PaginationBar
+        :shown="items.length"
+        :total="meta.total"
+        :current-page="meta.currentPage"
+        :last-page="meta.lastPage"
+        items-label="itens"
+        @change="goToPage"
+      />
     </section>
 
     <StockAdjustModal
       v-model="isAdjustOpen"
       v-model:form="adjustForm"
       :items="items"
+      :is-submitting="isSubmittingAdjust"
+      :error-message="adjustError"
       @submit="handleSubmitAdjust"
     />
 
-    <StockHistoryModal v-model="isHistoryOpen" :item="historyItem" :movements="historyMovements" />
+    <StockHistoryModal
+      v-model="isHistoryOpen"
+      :item="historyItem"
+      :movements="historyMovements"
+      :is-loading="isLoadingHistory"
+    />
   </AppShell>
 </template>
 
@@ -193,6 +244,24 @@ function openHistory(item: InventoryItem) {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 22px;
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.page-loading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
 
 .card {

@@ -1,86 +1,122 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { User, Mail, Phone, Building2, Hash, MapPin, CheckCircle2 } from '@lucide/vue'
+import { onMounted } from 'vue'
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  CreditCard,
+  Landmark,
+  Mail,
+  Phone,
+  User,
+} from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import AuthTextField from '@/features/auth/components/AuthTextField.vue'
 import { useProfileForm } from '@/features/profile/composables/useProfileForm'
+import { useAuthStore } from '@/stores/auth'
 
-const { form, justSaved, save } = useProfileForm()
+const authStore = useAuthStore()
+const { form, bankAccountNumberMasked, isLoading, loadError, isSaving, saveError, justSaved, load, save } =
+  useProfileForm()
 
-const initials = computed(() =>
-  form.name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join(''),
-)
+onMounted(() => {
+  load()
+})
 </script>
 
 <template>
   <AppShell
     title="Perfil"
-    :user-name="form.name"
+    :user-name="authStore.user?.name ?? ''"
     user-role="Fornecedor Premium"
-    :user-initials="initials"
+    :user-initials="authStore.initials"
   >
     <div class="page-head">
       <div>
         <h1 class="page-title">Perfil</h1>
-        <p class="page-sub">Gerencie os dados da sua conta e da sua empresa.</p>
+        <p class="page-sub">Consulte os dados da sua conta e gira os dados da sua empresa.</p>
       </div>
     </div>
 
     <section class="card card--summary">
-      <span class="avatar">{{ initials }}</span>
+      <span class="avatar">{{ authStore.initials }}</span>
       <div class="summary__info">
-        <span class="summary__name">{{ form.name || 'Sem nome' }}</span>
-        <span class="summary__role">{{ form.companyName || 'Fornecedor Premium' }}</span>
+        <span class="summary__name">{{ authStore.user?.name ?? 'Sem nome' }}</span>
+        <span class="summary__role">{{ authStore.user?.email }}</span>
       </div>
     </section>
 
+    <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="isLoading" class="page-loading">A carregar dados da empresa...</p>
+
     <form class="card card--form" novalidate @submit.prevent="save">
-      <h2 class="card__title">Dados de Conta</h2>
+      <h2 class="card__title">Dados da Empresa</h2>
+      <p class="card__sub">
+        Estes dados aparecem nos documentos e comunicações enviadas aos seus clientes.
+      </p>
+
+      <p v-if="saveError" class="form-error"><AlertCircle :size="15" /> {{ saveError }}</p>
+
       <div class="field-grid">
-        <AuthTextField id="profile-name" v-model="form.name" label="Nome completo" :icon="User" />
         <AuthTextField
-          id="profile-email"
-          v-model="form.email"
-          label="Email"
-          type="email"
-          :icon="Mail"
+          id="profile-company-name"
+          v-model="form.name"
+          label="Nome da empresa"
+          :icon="Building2"
+        />
+        <AuthTextField
+          id="profile-contact-name"
+          v-model="form.contactName"
+          label="Nome do contacto"
+          :icon="User"
         />
         <AuthTextField
           id="profile-phone"
           v-model="form.phone"
-          label="Contacto"
+          label="Telefone"
           type="tel"
           :icon="Phone"
         />
-      </div>
-
-      <h2 class="card__title card__title--spaced">Dados da Empresa</h2>
-      <div class="field-grid">
         <AuthTextField
-          id="profile-company"
-          v-model="form.companyName"
-          label="Nome da empresa"
-          :icon="Building2"
+          id="profile-email"
+          v-model="form.email"
+          label="Email da empresa"
+          type="email"
+          :icon="Mail"
         />
-        <AuthTextField id="profile-tax-id" v-model="form.taxId" label="NUIT" :icon="Hash" />
         <AuthTextField
-          id="profile-address"
-          v-model="form.address"
-          label="Endereço"
-          :icon="MapPin"
+          id="profile-bank-name"
+          v-model="form.bankName"
+          label="Banco"
+          :icon="Landmark"
+        />
+        <AuthTextField
+          id="profile-bank-holder"
+          v-model="form.bankAccountHolder"
+          label="Titular da conta"
+          :icon="User"
+        />
+        <AuthTextField
+          id="profile-bank-account"
+          v-model="form.bankAccountNumber"
+          label="Número da conta"
+          :icon="CreditCard"
+          :placeholder="bankAccountNumberMasked ?? 'Sem conta registada'"
+          :hint="
+            bankAccountNumberMasked
+              ? 'Deixe em branco para manter o número actual.'
+              : undefined
+          "
         />
       </div>
 
       <div class="card__foot">
-        <span v-if="justSaved" class="saved-note"
-          ><CheckCircle2 :size="16" /> Alterações guardadas.</span
-        >
-        <button class="btn" type="submit">Guardar Alterações</button>
+        <span v-if="justSaved" class="saved-note">
+          <CheckCircle2 :size="16" /> Alterações guardadas.
+        </span>
+        <button class="btn" type="submit" :disabled="isSaving">
+          {{ isSaving ? 'A guardar...' : 'Guardar Alterações' }}
+        </button>
       </div>
     </form>
   </AppShell>
@@ -103,6 +139,36 @@ const initials = computed(() =>
   margin: 0;
   font-size: 14px;
   color: var(--color-body);
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.page-loading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
 }
 
 .card {
@@ -156,16 +222,16 @@ const initials = computed(() =>
 }
 
 .card__title {
-  margin: 0 0 16px;
+  margin: 0 0 4px;
   font-size: 15px;
   font-weight: 700;
   color: var(--color-ink);
 }
 
-.card__title--spaced {
-  margin-top: 8px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-border);
+.card__sub {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--color-body);
 }
 
 .field-grid {
@@ -209,8 +275,13 @@ const initials = computed(() =>
   transition: background 0.15s;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
   background: var(--brand-primary-dark);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 720px) {
