@@ -27,16 +27,16 @@ export function useForgotPasswordForm() {
     if (!validate()) return false
 
     loading.value = true
-    try {
-      await requestPasswordReset(email.value)
-      submitted.value = true
-      return true
-    } catch {
-      formError.value = 'Não foi possível enviar o email. Tente novamente.'
+    const result = await requestPasswordReset(email.value)
+    loading.value = false
+
+    if (!result.ok) {
+      formError.value = result.error ?? 'Não foi possível enviar o email. Tente novamente.'
       return false
-    } finally {
-      loading.value = false
     }
+
+    submitted.value = true
+    return true
   }
 
   function reset() {

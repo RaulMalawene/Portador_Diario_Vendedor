@@ -28,3 +28,8 @@ export interface RegisterFieldErrors {
 export interface ForgotPasswordFieldErrors {
   email?: string
 }
+
+export interface ResetPasswordFieldErrors {
+  password?: string
+  confirmPassword?: string
+}

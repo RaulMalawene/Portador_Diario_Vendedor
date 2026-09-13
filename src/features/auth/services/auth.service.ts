@@ -1,7 +1,5 @@
 import { apiRequest, type ApiResult } from '@/services/apiClient'
 
-const SIMULATED_LATENCY_MS = 900
-
 export interface AuthUser {
   id: number
   name: string
@@ -45,10 +43,28 @@ export function logout(token: string): Promise<ApiResult<{ message: string }>> {
   return apiRequest<{ message: string }>('/logout', { method: 'POST', token })
 }
 
-export async function requestPasswordReset(email: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS))
+export function requestPasswordReset(email: string): Promise<ApiResult<{ message: string }>> {
+  return apiRequest<{ message: string }>('/forgot-password', {
+    method: 'POST',
+    body: { email },
+  })
+}
 
-  if (!email) {
-    throw new Error('Missing email')
-  }
+export interface ResetPasswordInput {
+  token: string
+  email: string
+  password: string
+  passwordConfirmation: string
+}
+
+export function resetPassword(payload: ResetPasswordInput): Promise<ApiResult<{ message: string }>> {
+  return apiRequest<{ message: string }>('/reset-password', {
+    method: 'POST',
+    body: {
+      token: payload.token,
+      email: payload.email,
+      password: payload.password,
+      password_confirmation: payload.passwordConfirmation,
+    },
+  })
 }
