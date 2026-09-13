@@ -2,7 +2,6 @@
 import { computed, onMounted } from 'vue'
 import { AlertCircle, Boxes, Package, ShoppingCart, Users } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
-import AppFooter from '@/layouts/AppFooter.vue'
 import KpiCard from '@/features/dashboard/components/KpiCard.vue'
 import SalesBarChart from '@/features/dashboard/components/SalesBarChart.vue'
 import OrderStatusDonutChart from '@/features/dashboard/components/OrderStatusDonutChart.vue'
@@ -115,7 +114,7 @@ onMounted(() => {
       </aside>
     </div>
 
-    <AppFooter />
+    
   </AppShell>
 </template>
 

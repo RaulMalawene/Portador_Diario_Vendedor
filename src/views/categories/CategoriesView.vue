@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { AlertCircle, Plus } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
-import AppFooter from '@/layouts/AppFooter.vue'
 import CategoriesToolbar from '@/features/categories/components/CategoriesToolbar.vue'
 import CategoryCard from '@/features/categories/components/CategoryCard.vue'
 import CategoryFormModal from '@/features/categories/components/CategoryFormModal.vue'
@@ -93,7 +92,7 @@ onMounted(() => {
       @submit="handleSubmit"
     />
 
-    <AppFooter />
+    
   </AppShell>
 </template>
 
