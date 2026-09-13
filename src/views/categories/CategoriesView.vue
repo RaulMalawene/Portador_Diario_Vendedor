@@ -122,6 +122,7 @@ onMounted(() => {
 .page-actions {
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   gap: 10px;
 }
 

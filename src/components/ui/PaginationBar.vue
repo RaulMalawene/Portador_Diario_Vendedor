@@ -72,8 +72,10 @@ function go(page: number) {
 <style scoped>
 .pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 16px;
   border-top: 1px solid var(--color-border);
 }
@@ -85,7 +87,15 @@ function go(page: number) {
 
 .pagination__pages {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 .page-btn {

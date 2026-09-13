@@ -9,6 +9,7 @@ const total = computed(() => props.total)
 </script>
 
 <template>
+  <div class="table-scroll">
   <table class="table">
     <thead>
       <tr>
@@ -29,6 +30,7 @@ const total = computed(() => props.total)
       </tr>
     </tbody>
   </table>
+  </div>
 
   <div class="total-row">
     <span>Total da Encomenda</span>
@@ -37,9 +39,21 @@ const total = computed(() => props.total)
 </template>
 
 <style scoped>
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
+}
+
+@media (max-width: 600px) {
+  .table {
+    min-width: 480px;
+  }
 }
 
 .table th {

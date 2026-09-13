@@ -32,6 +32,7 @@ function formatDate(value: string): string {
 </script>
 
 <template>
+  <div class="table-scroll">
   <table class="table">
     <colgroup>
       <col class="col-number" />
@@ -83,13 +84,26 @@ function formatDate(value: string): string {
       </tr>
     </tbody>
   </table>
+  </div>
 </template>
 
 <style scoped>
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
+}
+
+@media (max-width: 900px) {
+  .table {
+    min-width: 720px;
+  }
 }
 
 .col-number {

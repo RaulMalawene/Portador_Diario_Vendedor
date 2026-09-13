@@ -77,10 +77,12 @@ onBeforeUnmount(() => {
 .app-modal__card {
   position: relative;
   width: 100%;
+  max-height: calc(100vh - 48px);
   padding: 32px;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
+  overflow-y: auto;
 }
 
 .app-modal__card--sm {
@@ -131,5 +133,16 @@ onBeforeUnmount(() => {
 .app-modal-enter-from .app-modal__card,
 .app-modal-leave-to .app-modal__card {
   transform: scale(0.96) translateY(4px);
+}
+
+@media (max-width: 480px) {
+  .app-modal {
+    padding: 12px;
+  }
+
+  .app-modal__card {
+    max-height: calc(100vh - 24px);
+    padding: 22px 18px;
+  }
 }
 </style>
