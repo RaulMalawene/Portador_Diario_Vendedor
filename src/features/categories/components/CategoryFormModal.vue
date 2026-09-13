@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { AlertCircle } from '@lucide/vue'
 import AppModal from '@/components/ui/AppModal.vue'
 import type { CategoryFormState } from '../types/categories.types'
 
 defineProps<{
   isEditing: boolean
+  errorMessage?: string | null
 }>()
 
 const isOpen = defineModel<boolean>({ required: true })
@@ -23,6 +25,10 @@ function close() {
     </h2>
 
     <form class="category-modal__body" novalidate @submit.prevent="emit('submit')">
+      <p v-if="errorMessage" class="category-modal__error">
+        <AlertCircle :size="15" /> {{ errorMessage }}
+      </p>
+
       <label class="field">
         <span class="field__label">Nome da Categoria</span>
         <input
@@ -33,28 +39,6 @@ function close() {
           placeholder="Ex: Congelados"
         />
       </label>
-
-      <label class="field">
-        <span class="field__label">Descrição</span>
-        <textarea
-          v-model="form.description"
-          class="textarea"
-          rows="3"
-          placeholder="Explique brevemente o que pertence a esta categoria..."
-        ></textarea>
-      </label>
-
-      <div class="toggle-row">
-        <div>
-          <span class="field__label">Estado</span>
-          <span class="field__hint">Categorias inactivas ficam ocultas no catálogo.</span>
-        </div>
-        <label class="switch">
-          <input v-model="form.isActive" type="checkbox" />
-          <span class="switch__track"></span>
-          <span class="switch__text">{{ form.isActive ? 'Activa' : 'Inactiva' }}</span>
-        </label>
-      </div>
 
       <div class="category-modal__foot">
         <button class="btn btn--ghost" type="button" @click="close">Cancelar</button>
@@ -74,6 +58,18 @@ function close() {
   color: var(--color-ink);
 }
 
+.category-modal__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
 .field {
   display: block;
   margin-bottom: 18px;
@@ -85,13 +81,6 @@ function close() {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-ink);
-}
-
-.field__hint {
-  display: block;
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--color-muted);
 }
 
 .input {
@@ -112,79 +101,6 @@ function close() {
 .input:focus {
   border-color: var(--brand-primary);
   box-shadow: 0 0 0 3px var(--brand-primary-tint);
-}
-
-.textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 14px;
-  color: var(--color-ink);
-  outline: 0;
-  resize: vertical;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
-.textarea:focus {
-  border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px var(--brand-primary-tint);
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 0 4px;
-}
-
-.switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
-
-.switch input {
-  display: none;
-}
-
-.switch__track {
-  position: relative;
-  width: 42px;
-  height: 24px;
-  border-radius: var(--radius-full);
-  background: var(--color-border);
-  transition: background 0.15s;
-}
-
-.switch__track::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  transition: transform 0.15s;
-}
-
-.switch input:checked + .switch__track {
-  background: var(--brand-primary);
-}
-
-.switch input:checked + .switch__track::after {
-  transform: translateX(18px);
-}
-
-.switch__text {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-ink);
 }
 
 .category-modal__foot {

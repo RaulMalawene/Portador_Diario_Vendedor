@@ -1,21 +1,19 @@
 import { reactive, ref } from 'vue'
 import type { Category, CategoryFormState } from '../types/categories.types'
 
-const EMPTY_FORM: CategoryFormState = {
-  name: '',
-  description: '',
-  isActive: true,
-}
+const EMPTY_FORM: CategoryFormState = { name: '' }
 
 export function useCategoryForm() {
   const isOpen = ref(false)
   const isEditing = ref(false)
-  const editingId = ref<string | null>(null)
+  const editingId = ref<number | null>(null)
   const form = reactive<CategoryFormState>({ ...EMPTY_FORM })
+  const formError = ref<string | null>(null)
 
   function openCreate() {
     isEditing.value = false
     editingId.value = null
+    formError.value = null
     Object.assign(form, EMPTY_FORM)
     isOpen.value = true
   }
@@ -23,11 +21,8 @@ export function useCategoryForm() {
   function openEdit(category: Category) {
     isEditing.value = true
     editingId.value = category.id
-    Object.assign(form, {
-      name: category.name,
-      description: category.description,
-      isActive: category.active,
-    })
+    formError.value = null
+    Object.assign(form, { name: category.name })
     isOpen.value = true
   }
 
@@ -35,5 +30,5 @@ export function useCategoryForm() {
     isOpen.value = false
   }
 
-  return { isOpen, isEditing, editingId, form, openCreate, openEdit, close }
+  return { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, close }
 }

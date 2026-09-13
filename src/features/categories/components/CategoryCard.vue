@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import { Package2 } from '@lucide/vue'
-import StatusBadge from '@/components/ui/StatusBadge.vue'
 import CategoryCardMenu from './CategoryCardMenu.vue'
 import { categoryIcons } from '../utils/categoryIcons'
 import type { Category } from '../types/categories.types'
 
 defineProps<{ category: Category }>()
 
-defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
+defineEmits<{ edit: []; remove: [] }>()
 </script>
 
 <template>
-  <article
-    class="cat-card"
-    :class="[`cat-card--${category.theme}`, { 'is-inactive': !category.active }]"
-  >
+  <article class="cat-card" :class="`cat-card--${category.theme}`">
     <!-- Camada puramente decorativa: fica recortada aos cantos arredondados do
          card, sem afectar o menu (que precisa de "escapar" para fora do card). -->
     <span class="cat-card__decor" aria-hidden="true">
@@ -25,17 +21,11 @@ defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
       <span class="cat-card__icon">
         <component :is="categoryIcons[category.icon]" :size="24" />
       </span>
-      <CategoryCardMenu
-        :category="category"
-        @edit="$emit('edit')"
-        @toggle-active="$emit('toggleActive')"
-        @remove="$emit('remove')"
-      />
+      <CategoryCardMenu @edit="$emit('edit')" @remove="$emit('remove')" />
     </header>
 
     <div class="cat-card__body">
       <h3 class="cat-card__name">{{ category.name }}</h3>
-      <p class="cat-card__desc">{{ category.description }}</p>
     </div>
 
     <footer class="cat-card__foot">
@@ -43,9 +33,6 @@ defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
         <Package2 :size="14" />
         {{ category.productsCount }} {{ category.productsCount === 1 ? 'produto' : 'produtos' }}
       </span>
-      <StatusBadge :variant="category.active ? 'success' : 'neutral'">
-        {{ category.active ? 'Activa' : 'Inactiva' }}
-      </StatusBadge>
     </footer>
   </article>
 </template>
@@ -71,15 +58,6 @@ defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
   border-color: var(--cat-color);
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
-}
-
-.cat-card.is-inactive {
-  background: var(--color-surface-soft);
-}
-
-.cat-card.is-inactive .cat-card__name,
-.cat-card.is-inactive .cat-card__desc {
-  opacity: 0.7;
 }
 
 /* Wrapper isolado que recorta a "glow" e a barra de cor aos cantos do
@@ -190,25 +168,12 @@ defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
   white-space: nowrap;
 }
 
-.cat-card__desc {
-  display: -webkit-box;
-  min-height: 37px;
-  margin: 0;
-  overflow: hidden;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--color-body);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
 .cat-card__foot {
   position: relative;
   z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   padding-top: 14px;
   border-top: 1px solid var(--color-surface-soft);

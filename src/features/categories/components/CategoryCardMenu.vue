@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { MoreHorizontal, Pencil, Power, PowerOff, Trash2 } from '@lucide/vue'
+import { MoreHorizontal, Pencil, Trash2 } from '@lucide/vue'
 import { useClickOutside } from '@/composables/useClickOutside'
-import type { Category } from '../types/categories.types'
 
-defineProps<{ category: Category }>()
-
-const emit = defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
+const emit = defineEmits<{ edit: []; remove: [] }>()
 
 const isOpen = ref(false)
 const rootRef = ref<HTMLElement | null>(null)
@@ -34,10 +31,6 @@ function handle(action: () => void) {
     <div v-if="isOpen" class="cat-menu__panel">
       <button type="button" @click="handle(() => emit('edit'))">
         <Pencil :size="15" /> Editar
-      </button>
-      <button type="button" @click="handle(() => emit('toggleActive'))">
-        <component :is="category.active ? PowerOff : Power" :size="15" />
-        {{ category.active ? 'Desactivar' : 'Activar' }}
       </button>
       <button type="button" class="cat-menu__danger" @click="handle(() => emit('remove'))">
         <Trash2 :size="15" /> Eliminar

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { Plus } from '@lucide/vue'
+import { computed, onMounted, ref } from 'vue'
+import { AlertCircle, Plus } from '@lucide/vue'
 import AppShell from '@/layouts/AppShell.vue'
 import AppFooter from '@/layouts/AppFooter.vue'
 import CategoriesToolbar from '@/features/categories/components/CategoriesToolbar.vue'
@@ -13,37 +13,40 @@ import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const { categories, upsert, remove, toggleActive } = useCategories()
-const { isOpen, isEditing, editingId, form, openCreate, openEdit, close } = useCategoryForm()
+const { categories, isLoading, loadError, load, upsert, remove } = useCategories()
+const { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, close } =
+  useCategoryForm()
 
 const search = ref('')
-const statusFilter = ref('all')
 
-const filteredCategories = computed(() =>
-  categories.value.filter((category) => {
-    const query = search.value.trim().toLowerCase()
-    const matchesQuery =
-      !query ||
-      category.name.toLowerCase().includes(query) ||
-      category.description.toLowerCase().includes(query)
-
-    const matchesStatus =
-      statusFilter.value === 'all' ||
-      (statusFilter.value === 'active' && category.active) ||
-      (statusFilter.value === 'inactive' && !category.active)
-
-    return matchesQuery && matchesStatus
-  }),
-)
+// A lista de categorias não é paginada pela API, por isso o filtro de
+// pesquisa é feito aqui mesmo, sobre os dados já carregados.
+const filteredCategories = computed(() => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return categories.value
+  return categories.value.filter((category) => category.name.toLowerCase().includes(query))
+})
 
 function handleEdit(category: Category) {
   openEdit(category)
 }
 
-function handleSubmit() {
-  upsert(form, editingId.value)
-  close()
+async function handleSubmit() {
+  const result = await upsert(form, editingId.value)
+  if (result.ok) {
+    close()
+    return
+  }
+  formError.value = result.error
 }
+
+async function handleRemove(id: number) {
+  await remove(id)
+}
+
+onMounted(() => {
+  load()
+})
 </script>
 
 <template>
@@ -65,7 +68,10 @@ function handleSubmit() {
       </div>
     </div>
 
-    <CategoriesToolbar v-model:search="search" v-model:status="statusFilter" />
+    <CategoriesToolbar v-model:search="search" />
+
+    <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="isLoading" class="page-loading">A carregar categorias...</p>
 
     <section v-if="filteredCategories.length" class="categories-grid">
       <CategoryCard
@@ -73,12 +79,11 @@ function handleSubmit() {
         :key="category.id"
         :category="category"
         @edit="handleEdit(category)"
-        @toggle-active="toggleActive(category.id)"
-        @remove="remove(category.id)"
+        @remove="handleRemove(category.id)"
       />
     </section>
 
-    <div v-else class="categories-empty">
+    <div v-else-if="!isLoading" class="categories-empty">
       <p>Nenhuma categoria encontrada.</p>
     </div>
 
@@ -86,6 +91,7 @@ function handleSubmit() {
       v-model="isOpen"
       v-model:form="form"
       :is-editing="isEditing"
+      :error-message="formError"
       @submit="handleSubmit"
     />
 
@@ -142,6 +148,24 @@ function handleSubmit() {
 
 .btn:hover {
   background: var(--brand-primary-dark);
+}
+
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.page-loading {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--color-muted);
 }
 
 .categories-grid {
