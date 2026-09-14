@@ -8,7 +8,7 @@ const props = withDefaults(
     phrases?: string[]
   }>(),
   {
-    eyebrow: 'O portal do fornecedor',
+    eyebrow: 'O portal do Vendedor',
     phrases: () => [
       'entregar as suas encomendas com rapidez',
       'rastrear o correio em tempo real',
