@@ -56,4 +56,4 @@ A parte que me deu mais trabalho foi ligar o frontend ao backend em produção. 
 
 O que mais quero fazer a seguir é desenvolver a área do cliente como deve ser, bem organizada e completa, com registo próprio, dashboard e a gestão das suas encomendas, em vez da consulta simples que existe hoje.
 
-Para além disso, quero alargar os testes aos ecrãs mais importantes, tirar o IP fixo do `vercel.json` e passá-lo para uma variável de ambiente, e reforçar a autenticação com um fluxo de token de renovação. Gostaria também de dar ao backend um endereço seguro próprio, para dispensar o proxy, e de desenvolver a parte das imagens, permitindo que ao registar um produto o vendedor lhe possa anexar fotografias.
+Para além disso, quero alargar os testes aos ecrãs mais importantes, tirar o IP fixo do `vercel.json` e passá-lo para uma variável de ambiente. Gostaria também de desenvolver a parte das imagens, permitindo que ao registar um produto o vendedor lhe possa anexar fotografias.
