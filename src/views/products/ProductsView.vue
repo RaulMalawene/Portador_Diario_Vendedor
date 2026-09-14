@@ -9,6 +9,7 @@ import ProductFormModal from '@/features/products/components/ProductFormModal.vu
 import { useProducts } from '@/features/products/composables/useProducts'
 import { useProductForm } from '@/features/products/composables/useProductForm'
 import { exportProductsToPdf } from '@/features/products/utils/exportProductsPdf'
+import { exportProductsToCsv } from '@/features/products/utils/exportProductsCsv'
 import type { Product, ProductStatusFilter } from '@/features/products/types/products.types'
 import { useAuthStore } from '@/stores/auth'
 
@@ -32,7 +33,7 @@ const { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, clo
 
 const search = ref('')
 const statusFilter = ref<ProductStatusFilter>('all')
-const isExporting = ref(false)
+const exportingFormat = ref<'pdf' | 'csv' | null>(null)
 const exportError = ref('')
 
 function currentFilters(page = 1) {
@@ -74,10 +75,10 @@ function handleOpenCreate() {
   if (!categoryOptions.value.length) loadCategoryOptions()
 }
 
-async function handleExportPdf() {
-  if (isExporting.value) return
+async function runExport(format: 'pdf' | 'csv') {
+  if (exportingFormat.value) return
 
-  isExporting.value = true
+  exportingFormat.value = format
   exportError.value = ''
 
   const all = await fetchAllForExport({
@@ -85,10 +86,10 @@ async function handleExportPdf() {
     status: statusFilter.value === 'all' ? undefined : statusFilter.value,
   })
 
-  isExporting.value = false
+  exportingFormat.value = null
 
   if (!all) {
-    exportError.value = 'Não foi possível gerar o PDF. Tente novamente.'
+    exportError.value = `Não foi possível gerar o ${format === 'pdf' ? 'PDF' : 'Excel'}. Tente novamente.`
     return
   }
 
@@ -97,7 +98,16 @@ async function handleExportPdf() {
     return
   }
 
-  exportProductsToPdf(all, authStore.user?.name ?? '')
+  if (format === 'pdf') exportProductsToPdf(all, authStore.user?.name ?? '')
+  else exportProductsToCsv(all)
+}
+
+function handleExportPdf() {
+  void runExport('pdf')
+}
+
+function handleExportCsv() {
+  void runExport('csv')
 }
 
 async function handleToggleActive(product: Product) {
@@ -130,13 +140,22 @@ onMounted(() => {
         <button
           class="btn btn--ghost"
           type="button"
-          :disabled="isExporting"
+          :disabled="exportingFormat !== null"
           @click="handleExportPdf"
         >
-          <FileDown :size="16" /><span>{{ isExporting ? 'A gerar PDF...' : 'Exportar PDF' }}</span>
+          <FileDown :size="16" /><span>{{
+            exportingFormat === 'pdf' ? 'A gerar PDF...' : 'Exportar PDF'
+          }}</span>
         </button>
-        <button class="btn btn--ghost" type="button">
-          <FileSpreadsheet :size="16" /><span>Excel</span>
+        <button
+          class="btn btn--ghost"
+          type="button"
+          :disabled="exportingFormat !== null"
+          @click="handleExportCsv"
+        >
+          <FileSpreadsheet :size="16" /><span>{{
+            exportingFormat === 'csv' ? 'A gerar...' : 'Excel'
+          }}</span>
         </button>
         <button class="btn" type="button" @click="handleOpenCreate">
           <Plus :size="16" /><span>Adicionar Produto</span>
