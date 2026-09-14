@@ -104,6 +104,16 @@ export function useInventory() {
     }
   }
 
+  async function fetchAllForExport(
+    filters: Omit<InventoryFilters, 'page'> = {},
+  ): Promise<InventoryItem[] | null> {
+    const token = authStore.token
+    if (!token) return null
+
+    const result = await fetchAllInventory(token, filters)
+    return result.ok ? result.items.map(toItem) : null
+  }
+
   async function movementsFor(productId: number): Promise<StockMovement[]> {
     const token = authStore.token
     if (!token) return []
@@ -144,6 +154,7 @@ export function useInventory() {
     isLoadingKpis,
     load,
     loadKpis,
+    fetchAllForExport,
     movementsFor,
     adjustStock,
   }

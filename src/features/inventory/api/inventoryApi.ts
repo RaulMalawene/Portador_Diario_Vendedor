@@ -84,8 +84,11 @@ export interface InventoryOutcome {
 
 const MAX_INVENTORY_PAGES = 20
 
-export async function fetchAllInventory(token: string): Promise<InventoryOutcome> {
-  const first = await fetchInventoryRequest(token, { page: 1 })
+export async function fetchAllInventory(
+  token: string,
+  filters: Omit<InventoryFilters, 'page'> = {},
+): Promise<InventoryOutcome> {
+  const first = await fetchInventoryRequest(token, { ...filters, page: 1 })
   if (!first.ok || !first.data) return { ok: false, items: [] }
 
   const all = [...first.data.data]
@@ -94,7 +97,9 @@ export async function fetchAllInventory(token: string): Promise<InventoryOutcome
 
   if (lastPage > 1) {
     const pages = Array.from({ length: lastPage - 1 }, (_, index) => index + 2)
-    const results = await Promise.all(pages.map((page) => fetchInventoryRequest(token, { page })))
+    const results = await Promise.all(
+      pages.map((page) => fetchInventoryRequest(token, { ...filters, page })),
+    )
     for (const result of results) {
       if (result.ok && result.data) all.push(...result.data.data)
       else ok = false

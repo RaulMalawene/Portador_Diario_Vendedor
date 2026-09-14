@@ -8,14 +8,17 @@ import OrdersTable from '@/features/orders/components/OrdersTable.vue'
 import OrderKpiCard from '@/features/orders/components/OrderKpiCard.vue'
 import { useOrders } from '@/features/orders/composables/useOrders'
 import { formatMoney } from '@/features/orders/utils/orders'
+import { exportOrdersToPdf } from '@/features/orders/utils/exportOrdersPdf'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const { orders, isLoading, loadError, meta, kpis, load, loadKpis } = useOrders()
+const { orders, isLoading, loadError, meta, kpis, load, loadKpis, fetchAllForExport } = useOrders()
 
 const search = ref('')
 const statusFilter = ref('all')
+const isExporting = ref(false)
+const exportError = ref('')
 
 function currentFilters(page = 1) {
   return {
@@ -23,6 +26,32 @@ function currentFilters(page = 1) {
     status: statusFilter.value === 'all' ? undefined : statusFilter.value,
     page,
   }
+}
+
+async function handleExportPdf() {
+  if (isExporting.value) return
+
+  isExporting.value = true
+  exportError.value = ''
+
+  const all = await fetchAllForExport({
+    search: search.value.trim() || undefined,
+    status: statusFilter.value === 'all' ? undefined : statusFilter.value,
+  })
+
+  isExporting.value = false
+
+  if (!all) {
+    exportError.value = 'Não foi possível gerar o PDF. Tente novamente.'
+    return
+  }
+
+  if (all.length === 0) {
+    exportError.value = 'Não há encomendas para exportar.'
+    return
+  }
+
+  exportOrdersToPdf(all, authStore.user?.name ?? '')
 }
 
 let searchDebounce: ReturnType<typeof setTimeout> | undefined
@@ -59,8 +88,13 @@ onMounted(() => {
         </p>
       </div>
       <div class="page-actions">
-        <button class="btn btn--ghost" type="button">
-          <FileDown :size="16" /><span>Exportar Dados</span>
+        <button
+          class="btn btn--ghost"
+          type="button"
+          :disabled="isExporting"
+          @click="handleExportPdf"
+        >
+          <FileDown :size="16" /><span>{{ isExporting ? 'A gerar PDF...' : 'Exportar Dados' }}</span>
         </button>
       </div>
     </div>
@@ -97,6 +131,7 @@ onMounted(() => {
     <OrdersToolbar v-model:search="search" v-model:status="statusFilter" />
 
     <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="exportError" class="page-error"><AlertCircle :size="15" /> {{ exportError }}</p>
     <p v-else-if="isLoading" class="page-loading">A carregar encomendas...</p>
 
     <section class="card card--table">
@@ -164,6 +199,11 @@ onMounted(() => {
 
 .btn:hover {
   background: var(--brand-primary-dark);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .btn--ghost {

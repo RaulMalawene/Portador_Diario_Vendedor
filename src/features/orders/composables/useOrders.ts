@@ -112,6 +112,16 @@ export function useOrders() {
     }
   }
 
+  async function fetchAllForExport(
+    filters: Omit<OrderFilters, 'page'> = {},
+  ): Promise<Order[] | null> {
+    const token = authStore.token
+    if (!token) return null
+
+    const result = await fetchAllOrders(token, filters)
+    return result.ok ? result.orders.map(toOrder) : null
+  }
+
   async function fetchOrder(id: number): Promise<Order | null> {
     const token = authStore.token
     if (!token) return null
@@ -145,6 +155,7 @@ export function useOrders() {
     isLoadingKpis,
     load,
     loadKpis,
+    fetchAllForExport,
     fetchOrder,
     advance,
   }

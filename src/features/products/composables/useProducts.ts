@@ -44,6 +44,28 @@ export function useProducts() {
     }
   }
 
+  async function fetchAllForExport(
+    filters: Omit<ProductFilters, 'page'> = {},
+  ): Promise<Product[] | null> {
+    const token = authStore.token
+    if (!token) return null
+
+    const all: Product[] = []
+    let page = 1
+    let lastPage = 1
+
+    do {
+      const result = await fetchProductsRequest(token, { ...filters, page })
+      if (!result.ok || !result.data) return null
+
+      all.push(...result.data.data)
+      lastPage = result.data.meta.last_page
+      page += 1
+    } while (page <= lastPage && page <= 200) // limite de segurança
+
+    return all
+  }
+
   async function loadCategoryOptions() {
     const token = authStore.token
     if (!token) return
@@ -115,6 +137,7 @@ export function useProducts() {
     meta,
     load,
     loadCategoryOptions,
+    fetchAllForExport,
     upsert,
     remove,
     toggleActive,

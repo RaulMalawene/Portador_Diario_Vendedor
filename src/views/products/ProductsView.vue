@@ -8,6 +8,7 @@ import PaginationBar from '@/components/ui/PaginationBar.vue'
 import ProductFormModal from '@/features/products/components/ProductFormModal.vue'
 import { useProducts } from '@/features/products/composables/useProducts'
 import { useProductForm } from '@/features/products/composables/useProductForm'
+import { exportProductsToPdf } from '@/features/products/utils/exportProductsPdf'
 import type { Product, ProductStatusFilter } from '@/features/products/types/products.types'
 import { useAuthStore } from '@/stores/auth'
 
@@ -21,6 +22,7 @@ const {
   meta,
   load,
   loadCategoryOptions,
+  fetchAllForExport,
   upsert,
   remove,
   toggleActive,
@@ -30,6 +32,8 @@ const { isOpen, isEditing, editingId, form, formError, openCreate, openEdit, clo
 
 const search = ref('')
 const statusFilter = ref<ProductStatusFilter>('all')
+const isExporting = ref(false)
+const exportError = ref('')
 
 function currentFilters(page = 1) {
   return {
@@ -70,6 +74,32 @@ function handleOpenCreate() {
   if (!categoryOptions.value.length) loadCategoryOptions()
 }
 
+async function handleExportPdf() {
+  if (isExporting.value) return
+
+  isExporting.value = true
+  exportError.value = ''
+
+  const all = await fetchAllForExport({
+    search: search.value.trim() || undefined,
+    status: statusFilter.value === 'all' ? undefined : statusFilter.value,
+  })
+
+  isExporting.value = false
+
+  if (!all) {
+    exportError.value = 'Não foi possível gerar o PDF. Tente novamente.'
+    return
+  }
+
+  if (all.length === 0) {
+    exportError.value = 'Não há produtos para exportar.'
+    return
+  }
+
+  exportProductsToPdf(all, authStore.user?.name ?? '')
+}
+
 async function handleToggleActive(product: Product) {
   await toggleActive(product)
 }
@@ -97,8 +127,13 @@ onMounted(() => {
         <p class="page-sub">Gerencie o seu catálogo de produtos, preços e níveis de stock.</p>
       </div>
       <div class="page-actions">
-        <button class="btn btn--ghost" type="button">
-          <FileDown :size="16" /><span>Exportar PDF</span>
+        <button
+          class="btn btn--ghost"
+          type="button"
+          :disabled="isExporting"
+          @click="handleExportPdf"
+        >
+          <FileDown :size="16" /><span>{{ isExporting ? 'A gerar PDF...' : 'Exportar PDF' }}</span>
         </button>
         <button class="btn btn--ghost" type="button">
           <FileSpreadsheet :size="16" /><span>Excel</span>
@@ -112,6 +147,7 @@ onMounted(() => {
     <ProductsToolbar v-model:search="search" v-model:status="statusFilter" />
 
     <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="exportError" class="page-error"><AlertCircle :size="15" /> {{ exportError }}</p>
     <p v-else-if="isLoading" class="page-loading">A carregar produtos...</p>
 
     <section class="card card--table">
@@ -193,6 +229,11 @@ onMounted(() => {
 
 .btn:hover {
   background: var(--brand-primary-dark);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .btn--ghost {

@@ -11,13 +11,24 @@ import StockHistoryModal from '@/features/inventory/components/StockHistoryModal
 import { useInventory } from '@/features/inventory/composables/useInventory'
 import { useStockAdjustForm } from '@/features/inventory/composables/useStockAdjustForm'
 import { formatCurrency } from '@/features/inventory/utils/inventory'
+import { exportInventoryToPdf } from '@/features/inventory/utils/exportInventoryPdf'
 import type { InventoryItem } from '@/features/inventory/types/inventory.types'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-const { items, isLoading, loadError, meta, kpis, load, loadKpis, movementsFor, adjustStock } =
-  useInventory()
+const {
+  items,
+  isLoading,
+  loadError,
+  meta,
+  kpis,
+  load,
+  loadKpis,
+  fetchAllForExport,
+  movementsFor,
+  adjustStock,
+} = useInventory()
 const {
   isOpen: isAdjustOpen,
   form: adjustForm,
@@ -30,6 +41,8 @@ const isSubmittingAdjust = ref(false)
 
 const search = ref('')
 const statusFilter = ref('all')
+const isExporting = ref(false)
+const exportError = ref('')
 
 function currentFilters(page = 1) {
   return {
@@ -37,6 +50,32 @@ function currentFilters(page = 1) {
     status: statusFilter.value === 'all' ? undefined : (statusFilter.value as 'low_stock' | 'out_of_stock'),
     page,
   }
+}
+
+async function handleExportPdf() {
+  if (isExporting.value) return
+
+  isExporting.value = true
+  exportError.value = ''
+
+  const all = await fetchAllForExport({
+    search: search.value.trim() || undefined,
+    status: statusFilter.value === 'all' ? undefined : (statusFilter.value as 'low_stock' | 'out_of_stock'),
+  })
+
+  isExporting.value = false
+
+  if (!all) {
+    exportError.value = 'Não foi possível gerar o PDF. Tente novamente.'
+    return
+  }
+
+  if (all.length === 0) {
+    exportError.value = 'Não há itens para exportar.'
+    return
+  }
+
+  exportInventoryToPdf(all, authStore.user?.name ?? '')
 }
 
 let searchDebounce: ReturnType<typeof setTimeout> | undefined
@@ -103,8 +142,13 @@ onMounted(() => {
         <p class="page-sub">Monitorize e controle os níveis de stock e evite rupturas.</p>
       </div>
       <div class="page-actions">
-        <button class="btn btn--ghost" type="button">
-          <FileDown :size="16" /><span>Exportar Dados</span>
+        <button
+          class="btn btn--ghost"
+          type="button"
+          :disabled="isExporting"
+          @click="handleExportPdf"
+        >
+          <FileDown :size="16" /><span>{{ isExporting ? 'A gerar PDF...' : 'Exportar Dados' }}</span>
         </button>
         <button class="btn" type="button" @click="openAdjust()">
           <Plus :size="16" /><span>Novo Movimento</span>
@@ -145,6 +189,7 @@ onMounted(() => {
     <InventoryToolbar v-model:search="search" v-model:status="statusFilter" />
 
     <p v-if="loadError" class="page-error"><AlertCircle :size="15" /> {{ loadError }}</p>
+    <p v-else-if="exportError" class="page-error"><AlertCircle :size="15" /> {{ exportError }}</p>
     <p v-else-if="isLoading" class="page-loading">A carregar inventário...</p>
 
     <section class="card card--table">
@@ -228,6 +273,11 @@ onMounted(() => {
 
 .btn:hover {
   background: var(--brand-primary-dark);
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .btn--ghost {

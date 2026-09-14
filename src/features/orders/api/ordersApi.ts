@@ -97,8 +97,11 @@ export interface OrdersOutcome {
 
 const MAX_ORDER_PAGES = 20
 
-export async function fetchAllOrders(token: string): Promise<OrdersOutcome> {
-  const first = await fetchOrdersRequest(token, { page: 1 })
+export async function fetchAllOrders(
+  token: string,
+  filters: Omit<OrderFilters, 'page'> = {},
+): Promise<OrdersOutcome> {
+  const first = await fetchOrdersRequest(token, { ...filters, page: 1 })
   if (!first.ok || !first.data) return { ok: false, orders: [] }
 
   const all = [...first.data.data]
@@ -107,7 +110,9 @@ export async function fetchAllOrders(token: string): Promise<OrdersOutcome> {
 
   if (lastPage > 1) {
     const pages = Array.from({ length: lastPage - 1 }, (_, index) => index + 2)
-    const results = await Promise.all(pages.map((page) => fetchOrdersRequest(token, { page })))
+    const results = await Promise.all(
+      pages.map((page) => fetchOrdersRequest(token, { ...filters, page })),
+    )
     for (const result of results) {
       if (result.ok && result.data) all.push(...result.data.data)
       else ok = false
