@@ -77,11 +77,13 @@ onBeforeUnmount(() => {
 .app-modal__card {
   position: relative;
   width: 100%;
+  min-width: 0;
   max-height: calc(100vh - 48px);
   padding: 32px;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-lg);
+  overflow-x: auto;
   overflow-y: auto;
 }
 
