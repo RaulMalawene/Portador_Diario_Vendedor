@@ -25,31 +25,36 @@ const progress = computed(() => {
 
 <template>
   <div class="stepper">
-    <div class="stepper__track">
-      <div class="stepper__fill" :style="{ width: `${progress}%` }"></div>
+    <div class="stepper__scroll">
+      <div class="stepper__track">
+        <div class="stepper__fill" :style="{ width: `${progress}%` }"></div>
+      </div>
+      <ol class="stepper__steps">
+        <li
+          v-for="step in steps"
+          :key="step.key"
+          class="step"
+          :class="{ 'is-done': step.done, 'is-active': step.active }"
+        >
+          <span class="step__icon">
+            <CheckCircle2 v-if="step.done" :size="20" />
+            <PackageCheck v-else-if="step.active" :size="20" />
+            <Circle v-else :size="20" />
+          </span>
+          <span class="step__label">{{ step.label }}</span>
+        </li>
+      </ol>
     </div>
-    <ol class="stepper__steps">
-      <li
-        v-for="step in steps"
-        :key="step.key"
-        class="step"
-        :class="{ 'is-done': step.done, 'is-active': step.active }"
-      >
-        <span class="step__icon">
-          <CheckCircle2 v-if="step.done" :size="20" />
-          <PackageCheck v-else-if="step.active" :size="20" />
-          <Circle v-else :size="20" />
-        </span>
-        <span class="step__label">{{ step.label }}</span>
-      </li>
-    </ol>
   </div>
 </template>
 
 <style scoped>
 .stepper {
-  position: relative;
   padding: 6px 4px 0;
+}
+
+.stepper__scroll {
+  position: relative;
 }
 
 .stepper__track {
@@ -144,12 +149,29 @@ const progress = computed(() => {
 }
 
 @media (max-width: 640px) {
-  .stepper__steps {
+  .stepper__scroll {
     overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .step {
+    flex: none;
+    width: 112px;
   }
 
   .step__label {
     font-size: 11px;
+  }
+
+  /* With fixed-width steps the track can't be positioned with % (that's
+     relative to the visible viewport, not the scrollable content), so pin
+     it in px to the icon centers of the first/last of the 5 steps
+     (5 * 112px = 560px total). */
+  .stepper__track {
+    left: 56px;
+    right: auto;
+    width: 448px;
   }
 }
 </style>
