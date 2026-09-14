@@ -436,6 +436,7 @@ onMounted(() => {
 }
 
 .card {
+  min-width: 0;
   padding: 22px;
   margin-bottom: 16px;
   border: 1px solid var(--color-border);
@@ -478,9 +479,14 @@ onMounted(() => {
 
 .grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 320px minmax(0, 1fr);
   align-items: start;
   gap: 16px;
+}
+
+.col-main,
+.col-side {
+  min-width: 0;
 }
 
 .not-found {
