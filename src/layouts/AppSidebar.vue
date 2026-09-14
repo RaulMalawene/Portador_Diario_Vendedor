@@ -100,6 +100,7 @@ function logout() {
   flex-shrink: 0;
   height: 100%;
   padding: 20px 16px;
+  background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
 }

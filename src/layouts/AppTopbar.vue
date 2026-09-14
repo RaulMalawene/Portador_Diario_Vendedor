@@ -51,7 +51,7 @@ const emit = defineEmits<{ 'toggle-nav': [] }>()
   min-width: 0;
 }
 
-.topbar__menu {
+.icon-btn.topbar__menu {
   display: none;
 }
 
@@ -111,7 +111,7 @@ const emit = defineEmits<{ 'toggle-nav': [] }>()
     padding: 0 16px;
   }
 
-  .topbar__menu {
+  .icon-btn.topbar__menu {
     display: flex;
   }
 }
