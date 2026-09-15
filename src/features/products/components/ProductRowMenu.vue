@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { MoreHorizontal, Pencil, Power, PowerOff, Trash2 } from '@lucide/vue'
-import { useClickOutside } from '@/composables/useClickOutside'
 import type { Product } from '../types/products.types'
 
 defineProps<{ product: Product }>()
@@ -10,19 +9,56 @@ const emit = defineEmits<{ edit: []; toggleActive: []; remove: [] }>()
 
 const isOpen = ref(false)
 const rootRef = ref<HTMLElement | null>(null)
+const panelRef = ref<HTMLElement | null>(null)
+const panelStyle = ref<Record<string, string>>({})
 
-useClickOutside(rootRef, () => {
+function updatePosition() {
+  const el = rootRef.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  panelStyle.value = {
+    position: 'fixed',
+    top: `${rect.bottom + 6}px`,
+    right: `${window.innerWidth - rect.right}px`,
+  }
+}
+
+function close() {
   isOpen.value = false
-})
+}
 
 function toggle() {
+  if (!isOpen.value) updatePosition()
   isOpen.value = !isOpen.value
 }
 
 function handle(action: () => void) {
   action()
-  isOpen.value = false
+  close()
 }
+
+function handleOutsideClick(event: MouseEvent) {
+  const target = event.target as Node
+  if (rootRef.value?.contains(target)) return
+  if (panelRef.value?.contains(target)) return
+  close()
+}
+
+function handleScrollOrResize() {
+  if (isOpen.value) close()
+}
+
+onMounted(() => {
+  document.addEventListener('mousedown', handleOutsideClick)
+  window.addEventListener('scroll', handleScrollOrResize, true)
+  window.addEventListener('resize', handleScrollOrResize)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleOutsideClick)
+  window.removeEventListener('scroll', handleScrollOrResize, true)
+  window.removeEventListener('resize', handleScrollOrResize)
+})
 </script>
 
 <template>
@@ -31,18 +67,20 @@ function handle(action: () => void) {
       <MoreHorizontal :size="18" />
     </button>
 
-    <div v-if="isOpen" class="row-menu__panel">
-      <button type="button" @click="handle(() => emit('edit'))">
-        <Pencil :size="15" /> Editar
-      </button>
-      <button type="button" @click="handle(() => emit('toggleActive'))">
-        <component :is="product.is_active ? PowerOff : Power" :size="15" />
-        {{ product.is_active ? 'Desactivar' : 'Activar' }}
-      </button>
-      <button type="button" class="row-menu__danger" @click="handle(() => emit('remove'))">
-        <Trash2 :size="15" /> Eliminar
-      </button>
-    </div>
+    <Teleport to="body">
+      <div v-if="isOpen" ref="panelRef" class="row-menu__panel" :style="panelStyle">
+        <button type="button" @click="handle(() => emit('edit'))">
+          <Pencil :size="15" /> Editar
+        </button>
+        <button type="button" @click="handle(() => emit('toggleActive'))">
+          <component :is="product.is_active ? PowerOff : Power" :size="15" />
+          {{ product.is_active ? 'Desactivar' : 'Activar' }}
+        </button>
+        <button type="button" class="row-menu__danger" @click="handle(() => emit('remove'))">
+          <Trash2 :size="15" /> Eliminar
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -70,10 +108,7 @@ function handle(action: () => void) {
 }
 
 .row-menu__panel {
-  position: absolute;
-  right: 0;
-  top: 38px;
-  z-index: 10;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   min-width: 170px;
